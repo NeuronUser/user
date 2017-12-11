@@ -40,7 +40,7 @@ func (o *OauthJumpURL) SetBasePath(bp string) {
 func (o *OauthJumpURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/oauth/jump"
+	var _path = "/token/oauthJump"
 
 	_basePath := o._basePath
 	if _basePath == "" {

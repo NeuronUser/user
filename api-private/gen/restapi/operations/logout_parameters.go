@@ -36,7 +36,12 @@ type LogoutParams struct {
 	  Required: true
 	  In: query
 	*/
-	Jwt string
+	RefreshToken string
+	/*
+	  Required: true
+	  In: query
+	*/
+	Token string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -47,8 +52,13 @@ func (o *LogoutParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	qs := runtime.Values(r.URL.Query())
 
-	qJwt, qhkJwt, _ := qs.GetOK("jwt")
-	if err := o.bindJwt(qJwt, qhkJwt, route.Formats); err != nil {
+	qRefreshToken, qhkRefreshToken, _ := qs.GetOK("refreshToken")
+	if err := o.bindRefreshToken(qRefreshToken, qhkRefreshToken, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qToken, qhkToken, _ := qs.GetOK("token")
+	if err := o.bindToken(qToken, qhkToken, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -58,19 +68,36 @@ func (o *LogoutParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 	return nil
 }
 
-func (o *LogoutParams) bindJwt(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *LogoutParams) bindRefreshToken(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
-		return errors.Required("jwt", "query")
+		return errors.Required("refreshToken", "query")
 	}
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
-	if err := validate.RequiredString("jwt", "query", raw); err != nil {
+	if err := validate.RequiredString("refreshToken", "query", raw); err != nil {
 		return err
 	}
 
-	o.Jwt = raw
+	o.RefreshToken = raw
+
+	return nil
+}
+
+func (o *LogoutParams) bindToken(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("token", "query")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+	if err := validate.RequiredString("token", "query", raw); err != nil {
+		return err
+	}
+
+	o.Token = raw
 
 	return nil
 }

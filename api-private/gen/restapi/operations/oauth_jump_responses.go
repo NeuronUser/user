@@ -16,7 +16,7 @@ import (
 // OauthJumpOKCode is the HTTP code returned for type OauthJumpOK
 const OauthJumpOKCode int = 200
 
-/*OauthJumpOK jwt
+/*OauthJumpOK ok
 
 swagger:response oauthJumpOK
 */
@@ -25,7 +25,7 @@ type OauthJumpOK struct {
 	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload *models.OauthJumpResponse `json:"body,omitempty"`
 }
 
 // NewOauthJumpOK creates OauthJumpOK with default headers values
@@ -34,13 +34,13 @@ func NewOauthJumpOK() *OauthJumpOK {
 }
 
 // WithPayload adds the payload to the oauth jump o k response
-func (o *OauthJumpOK) WithPayload(payload string) *OauthJumpOK {
+func (o *OauthJumpOK) WithPayload(payload *models.OauthJumpResponse) *OauthJumpOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the oauth jump o k response
-func (o *OauthJumpOK) SetPayload(payload string) {
+func (o *OauthJumpOK) SetPayload(payload *models.OauthJumpResponse) {
 	o.Payload = payload
 }
 
@@ -48,11 +48,12 @@ func (o *OauthJumpOK) SetPayload(payload string) {
 func (o *OauthJumpOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }
 
 /*OauthJumpDefault Error response

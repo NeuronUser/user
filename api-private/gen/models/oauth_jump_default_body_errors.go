@@ -17,7 +17,7 @@ import (
 // OauthJumpDefaultBodyErrors Errors
 // swagger:model oauthJumpDefaultBodyErrors
 
-type OauthJumpDefaultBodyErrors []*GetOauthStateDefaultBodyErrorsItems
+type OauthJumpDefaultBodyErrors []*RefreshTokenDefaultBodyErrorsItems
 
 // Validate validates this oauth jump default body errors
 func (m OauthJumpDefaultBodyErrors) Validate(formats strfmt.Registry) error {

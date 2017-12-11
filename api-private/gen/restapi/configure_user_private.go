@@ -36,14 +36,17 @@ func configureAPI(api *operations.UserPrivateAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	api.GetOauthStateHandler = operations.GetOauthStateHandlerFunc(func(params operations.GetOauthStateParams) middleware.Responder {
-		return middleware.NotImplemented("operation .GetOauthState has not yet been implemented")
-	})
 	api.LogoutHandler = operations.LogoutHandlerFunc(func(params operations.LogoutParams) middleware.Responder {
 		return middleware.NotImplemented("operation .Logout has not yet been implemented")
 	})
+	api.NewOauthStateHandler = operations.NewOauthStateHandlerFunc(func(params operations.NewOauthStateParams) middleware.Responder {
+		return middleware.NotImplemented("operation .NewOauthState has not yet been implemented")
+	})
 	api.OauthJumpHandler = operations.OauthJumpHandlerFunc(func(params operations.OauthJumpParams) middleware.Responder {
 		return middleware.NotImplemented("operation .OauthJump has not yet been implemented")
+	})
+	api.RefreshTokenHandler = operations.RefreshTokenHandlerFunc(func(params operations.RefreshTokenParams) middleware.Responder {
+		return middleware.NotImplemented("operation .RefreshToken has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}

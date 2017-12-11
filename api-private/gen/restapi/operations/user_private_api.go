@@ -35,14 +35,17 @@ func NewUserPrivateAPI(spec *loads.Document) *UserPrivateAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		GetOauthStateHandler: GetOauthStateHandlerFunc(func(params GetOauthStateParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetOauthState has not yet been implemented")
-		}),
 		LogoutHandler: LogoutHandlerFunc(func(params LogoutParams) middleware.Responder {
 			return middleware.NotImplemented("operation Logout has not yet been implemented")
 		}),
+		NewOauthStateHandler: NewOauthStateHandlerFunc(func(params NewOauthStateParams) middleware.Responder {
+			return middleware.NotImplemented("operation NewOauthState has not yet been implemented")
+		}),
 		OauthJumpHandler: OauthJumpHandlerFunc(func(params OauthJumpParams) middleware.Responder {
 			return middleware.NotImplemented("operation OauthJump has not yet been implemented")
+		}),
+		RefreshTokenHandler: RefreshTokenHandlerFunc(func(params RefreshTokenParams) middleware.Responder {
+			return middleware.NotImplemented("operation RefreshToken has not yet been implemented")
 		}),
 	}
 }
@@ -73,12 +76,14 @@ type UserPrivateAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// GetOauthStateHandler sets the operation handler for the get oauth state operation
-	GetOauthStateHandler GetOauthStateHandler
 	// LogoutHandler sets the operation handler for the logout operation
 	LogoutHandler LogoutHandler
+	// NewOauthStateHandler sets the operation handler for the new oauth state operation
+	NewOauthStateHandler NewOauthStateHandler
 	// OauthJumpHandler sets the operation handler for the oauth jump operation
 	OauthJumpHandler OauthJumpHandler
+	// RefreshTokenHandler sets the operation handler for the refresh token operation
+	RefreshTokenHandler RefreshTokenHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -142,16 +147,20 @@ func (o *UserPrivateAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.GetOauthStateHandler == nil {
-		unregistered = append(unregistered, "GetOauthStateHandler")
-	}
-
 	if o.LogoutHandler == nil {
 		unregistered = append(unregistered, "LogoutHandler")
 	}
 
+	if o.NewOauthStateHandler == nil {
+		unregistered = append(unregistered, "NewOauthStateHandler")
+	}
+
 	if o.OauthJumpHandler == nil {
 		unregistered = append(unregistered, "OauthJumpHandler")
+	}
+
+	if o.RefreshTokenHandler == nil {
+		unregistered = append(unregistered, "RefreshTokenHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -244,20 +253,25 @@ func (o *UserPrivateAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/oauth/state"] = NewGetOauthState(o.context, o.GetOauthStateHandler)
+	o.handlers["POST"]["/token/logout"] = NewLogout(o.context, o.LogoutHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/logout"] = NewLogout(o.context, o.LogoutHandler)
+	o.handlers["POST"]["/token/oauthState"] = NewNewOauthState(o.context, o.NewOauthStateHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/oauth/jump"] = NewOauthJump(o.context, o.OauthJumpHandler)
+	o.handlers["POST"]["/token/oauthJump"] = NewOauthJump(o.context, o.OauthJumpHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/token/refresh"] = NewRefreshToken(o.context, o.RefreshTokenHandler)
 
 }
 

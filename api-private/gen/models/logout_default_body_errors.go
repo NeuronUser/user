@@ -17,7 +17,7 @@ import (
 // LogoutDefaultBodyErrors Errors
 // swagger:model logoutDefaultBodyErrors
 
-type LogoutDefaultBodyErrors []*GetOauthStateDefaultBodyErrorsItems
+type LogoutDefaultBodyErrors []*RefreshTokenDefaultBodyErrorsItems
 
 // Validate validates this logout default body errors
 func (m LogoutDefaultBodyErrors) Validate(formats strfmt.Registry) error {

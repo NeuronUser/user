@@ -29,7 +29,7 @@ func NewOauthJump(ctx *middleware.Context, handler OauthJumpHandler) *OauthJump 
 	return &OauthJump{Context: ctx, Handler: handler}
 }
 
-/*OauthJump swagger:route POST /oauth/jump oauthJump
+/*OauthJump swagger:route POST /token/oauthJump oauthJump
 
 OauthJump oauth jump API
 

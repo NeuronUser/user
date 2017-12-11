@@ -1,17 +1,17 @@
 package main
 
 import (
-	"go.uber.org/zap"
-	"github.com/spf13/cobra"
-	"github.com/go-openapi/loads"
 	"github.com/NeuronFramework/log"
-	"github.com/go-openapi/runtime/middleware"
+	"github.com/NeuronFramework/restful"
 	"github.com/NeuronUser/user/api-private/gen/restapi"
 	"github.com/NeuronUser/user/api-private/gen/restapi/operations"
 	"github.com/NeuronUser/user/cmd/user-private-api/handler"
-	"net/http"
-	"github.com/NeuronFramework/restful"
+	"github.com/go-openapi/loads"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/rs/cors"
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"net/http"
 )
 
 func main() {
@@ -37,9 +37,10 @@ func main() {
 			return err
 		}
 
-		api.GetOauthStateHandler = operations.GetOauthStateHandlerFunc(h.GetOauthState)
-		api.OauthJumpHandler=operations.OauthJumpHandlerFunc(h.OauthJump)
-		api.LogoutHandler=operations.LogoutHandlerFunc(h.Logout)
+		api.NewOauthStateHandler = operations.NewOauthStateHandlerFunc(h.NewOauthState)
+		api.OauthJumpHandler = operations.OauthJumpHandlerFunc(h.OauthJump)
+		api.RefreshTokenHandler = operations.RefreshTokenHandlerFunc(h.RefreshToken)
+		api.LogoutHandler = operations.LogoutHandlerFunc(h.Logout)
 
 		logger.Info("Start server", zap.String("addr", bindAddr))
 		err = http.ListenAndServe(bindAddr,

@@ -29,7 +29,7 @@ func NewLogout(ctx *middleware.Context, handler LogoutHandler) *Logout {
 	return &Logout{Context: ctx, Handler: handler}
 }
 
-/*Logout swagger:route POST /logout logout
+/*Logout swagger:route POST /token/logout logout
 
 Logout logout API
 

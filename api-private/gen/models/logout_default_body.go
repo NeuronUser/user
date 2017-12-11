@@ -21,7 +21,7 @@ type LogoutDefaultBody struct {
 	Code string `json:"code,omitempty"`
 
 	// errors
-	Errors GetOauthStateDefaultBodyErrors `json:"errors"`
+	Errors RefreshTokenDefaultBodyErrors `json:"errors"`
 
 	// Error message
 	Message string `json:"message,omitempty"`

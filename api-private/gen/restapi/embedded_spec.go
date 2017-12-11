@@ -34,13 +34,19 @@ func init() {
   },
   "basePath": "/api-private/v1/users",
   "paths": {
-    "/logout": {
+    "/token/logout": {
       "post": {
         "operationId": "Logout",
         "parameters": [
           {
             "type": "string",
-            "name": "jwt",
+            "name": "token",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "refreshToken",
             "in": "query",
             "required": true
           }
@@ -58,7 +64,7 @@ func init() {
         }
       }
     },
-    "/oauth/jump": {
+    "/token/oauthJump": {
       "post": {
         "operationId": "OauthJump",
         "parameters": [
@@ -77,9 +83,9 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "jwt",
+            "description": "ok",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/OauthJumpResponse"
             }
           },
           "default": {
@@ -91,9 +97,9 @@ func init() {
         }
       }
     },
-    "/oauth/state": {
-      "get": {
-        "operationId": "GetOauthState",
+    "/token/oauthState": {
+      "post": {
+        "operationId": "NewOauthState",
         "responses": {
           "200": {
             "description": "state",
@@ -104,7 +110,35 @@ func init() {
           "default": {
             "description": "Error response",
             "schema": {
-              "$ref": "#/definitions/getOauthStateDefaultBody"
+              "$ref": "#/definitions/newOauthStateDefaultBody"
+            }
+          }
+        }
+      }
+    },
+    "/token/refresh": {
+      "post": {
+        "operationId": "RefreshToken",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "refreshToken",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "description": "token",
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "$ref": "#/definitions/refreshTokenDefaultBody"
             }
           }
         }
@@ -112,53 +146,16 @@ func init() {
     }
   },
   "definitions": {
-    "getOauthStateDefaultBody": {
+    "OauthJumpResponse": {
       "type": "object",
       "properties": {
-        "code": {
-          "description": "Error code",
+        "refreshToken": {
           "type": "string"
         },
-        "errors": {
-          "$ref": "#/definitions/getOauthStateDefaultBodyErrors"
-        },
-        "message": {
-          "description": "Error message",
-          "type": "string"
-        },
-        "status": {
-          "type": "string",
-          "format": "int32",
-          "default": "Http status"
-        }
-      },
-      "x-go-gen-location": "operations"
-    },
-    "getOauthStateDefaultBodyErrors": {
-      "description": "Errors",
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/getOauthStateDefaultBodyErrorsItems"
-      },
-      "x-go-gen-location": "operations"
-    },
-    "getOauthStateDefaultBodyErrorsItems": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "description": "error code",
-          "type": "string"
-        },
-        "field": {
-          "description": "field name",
-          "type": "string"
-        },
-        "message": {
-          "description": "error message",
+        "token": {
           "type": "string"
         }
-      },
-      "x-go-gen-location": "operations"
+      }
     },
     "logoutDefaultBody": {
       "type": "object",
@@ -168,7 +165,7 @@ func init() {
           "type": "string"
         },
         "errors": {
-          "$ref": "#/definitions/getOauthStateDefaultBodyErrors"
+          "$ref": "#/definitions/refreshTokenDefaultBodyErrors"
         },
         "message": {
           "description": "Error message",
@@ -186,11 +183,59 @@ func init() {
       "description": "Errors",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/getOauthStateDefaultBodyErrorsItems"
+        "$ref": "#/definitions/refreshTokenDefaultBodyErrorsItems"
       },
       "x-go-gen-location": "operations"
     },
     "logoutDefaultBodyErrorsItems": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "error code",
+          "type": "string"
+        },
+        "field": {
+          "description": "field name",
+          "type": "string"
+        },
+        "message": {
+          "description": "error message",
+          "type": "string"
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "newOauthStateDefaultBody": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "type": "string"
+        },
+        "errors": {
+          "$ref": "#/definitions/refreshTokenDefaultBodyErrors"
+        },
+        "message": {
+          "description": "Error message",
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "format": "int32",
+          "default": "Http status"
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "newOauthStateDefaultBodyErrors": {
+      "description": "Errors",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/refreshTokenDefaultBodyErrorsItems"
+      },
+      "x-go-gen-location": "operations"
+    },
+    "newOauthStateDefaultBodyErrorsItems": {
       "type": "object",
       "properties": {
         "code": {
@@ -216,7 +261,7 @@ func init() {
           "type": "string"
         },
         "errors": {
-          "$ref": "#/definitions/getOauthStateDefaultBodyErrors"
+          "$ref": "#/definitions/refreshTokenDefaultBodyErrors"
         },
         "message": {
           "description": "Error message",
@@ -234,11 +279,59 @@ func init() {
       "description": "Errors",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/getOauthStateDefaultBodyErrorsItems"
+        "$ref": "#/definitions/refreshTokenDefaultBodyErrorsItems"
       },
       "x-go-gen-location": "operations"
     },
     "oauthJumpDefaultBodyErrorsItems": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "error code",
+          "type": "string"
+        },
+        "field": {
+          "description": "field name",
+          "type": "string"
+        },
+        "message": {
+          "description": "error message",
+          "type": "string"
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "refreshTokenDefaultBody": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "type": "string"
+        },
+        "errors": {
+          "$ref": "#/definitions/refreshTokenDefaultBodyErrors"
+        },
+        "message": {
+          "description": "Error message",
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "format": "int32",
+          "default": "Http status"
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "refreshTokenDefaultBodyErrors": {
+      "description": "Errors",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/refreshTokenDefaultBodyErrorsItems"
+      },
+      "x-go-gen-location": "operations"
+    },
+    "refreshTokenDefaultBodyErrorsItems": {
       "type": "object",
       "properties": {
         "code": {
@@ -268,7 +361,7 @@ func init() {
             "type": "string"
           },
           "errors": {
-            "$ref": "#/definitions/getOauthStateDefaultBodyErrors"
+            "$ref": "#/definitions/refreshTokenDefaultBodyErrors"
           },
           "message": {
             "description": "Error message",
@@ -286,6 +379,11 @@ func init() {
   "securityDefinitions": {
     "Basic": {
       "type": "basic"
+    },
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   }
 }`))

@@ -13,7 +13,8 @@ import (
 
 // LogoutURL generates an URL for the logout operation
 type LogoutURL struct {
-	Jwt string
+	RefreshToken string
+	Token        string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -39,7 +40,7 @@ func (o *LogoutURL) SetBasePath(bp string) {
 func (o *LogoutURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/logout"
+	var _path = "/token/logout"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -49,9 +50,14 @@ func (o *LogoutURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	jwt := o.Jwt
-	if jwt != "" {
-		qs.Set("jwt", jwt)
+	refreshToken := o.RefreshToken
+	if refreshToken != "" {
+		qs.Set("refreshToken", refreshToken)
+	}
+
+	token := o.Token
+	if token != "" {
+		qs.Set("token", token)
 	}
 
 	result.RawQuery = qs.Encode()

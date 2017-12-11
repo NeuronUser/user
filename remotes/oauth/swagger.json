@@ -2,13 +2,13 @@
   "swagger": "2.0",
   "info": {
     "description": "",
-    "title": "User Private API",
+    "title": "Oauth API",
     "contact": {
       "name": "mars"
     },
     "version": "v1"
   },
-  "basePath": "/api-private/v1/users",
+  "basePath": "/api/v1/oauth",
   "schemes": [
     "http",
     "https"
@@ -22,11 +22,6 @@
   "securityDefinitions": {
     "Basic": {
       "type": "basic"
-    },
-    "Bearer": {
-      "type": "apiKey",
-      "in": "header",
-      "name": "Authorization"
     }
   },
   "parameters": {
@@ -76,15 +71,87 @@
     }
   },
   "paths": {
-    "/token/oauthState": {
+    "/token": {
       "post": {
         "summary": "",
-        "operationId": "NewOauthState",
+        "security": [
+          {
+            "Basic": [
+            ]
+          }
+        ],
+        "operationId": "Token",
         "parameters": [
+          {
+            "in": "query",
+            "name": "grant_type",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "response_type",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "redirect_uri",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "client_id",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "refresh_token",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "type": "string"
+          }
         ],
         "responses": {
           "200": {
-            "description": "state",
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/AccessToken"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "",
+        "operationId": "Me",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "access_token",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
             "schema": {
               "type": "string"
             }
@@ -94,101 +161,26 @@
           }
         }
       }
-    },
-    "/token/oauthJump": {
-      "post": {
-        "summary": "",
-        "operationId": "OauthJump",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "authorizationCode",
-            "type": "string",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "state",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "$ref": "#/definitions/OauthJumpResponse"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
-          }
-        }
-      }
-    },
-    "/token/refresh": {
-      "post": {
-        "summary": "",
-        "operationId": "RefreshToken",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "refreshToken",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "type": "string",
-              "description": "token"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
-          }
-        }
-      }
-    },
-    "/token/logout": {
-      "post": {
-        "summary": "",
-        "operationId": "Logout",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "token",
-            "type": "string",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "refreshToken",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok"
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
-          }
-        }
-      }
     }
   },
   "definitions": {
-    "OauthJumpResponse": {
+    "AccessToken": {
       "type": "object",
       "properties": {
-        "token": {
+        "access_token": {
           "type": "string"
         },
-        "refreshToken": {
+        "token_type": {
+          "type": "string"
+        },
+        "expires_in": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "scope": {
           "type": "string"
         }
       }
