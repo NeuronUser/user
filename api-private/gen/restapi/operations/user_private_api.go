@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	errors "github.com/go-openapi/errors"
+	"github.com/NeuronFramework/restful"
 	loads "github.com/go-openapi/loads"
 	runtime "github.com/go-openapi/runtime"
 	middleware "github.com/go-openapi/runtime/middleware"
@@ -29,7 +29,7 @@ func NewUserPrivateAPI(spec *loads.Document) *UserPrivateAPI {
 		defaultProduces:     "application/json",
 		ServerShutdown:      func() {},
 		spec:                spec,
-		ServeError:          errors.ServeError,
+		ServeError:          restful.ServeError,
 		BasicAuthenticator:  security.BasicAuth,
 		APIKeyAuthenticator: security.APIKeyAuth,
 		BearerAuthenticator: security.BearerAuth,
@@ -38,11 +38,11 @@ func NewUserPrivateAPI(spec *loads.Document) *UserPrivateAPI {
 		LogoutHandler: LogoutHandlerFunc(func(params LogoutParams) middleware.Responder {
 			return middleware.NotImplemented("operation Logout has not yet been implemented")
 		}),
-		NewOauthStateHandler: NewOauthStateHandlerFunc(func(params NewOauthStateParams) middleware.Responder {
-			return middleware.NotImplemented("operation NewOauthState has not yet been implemented")
-		}),
 		OauthJumpHandler: OauthJumpHandlerFunc(func(params OauthJumpParams) middleware.Responder {
 			return middleware.NotImplemented("operation OauthJump has not yet been implemented")
+		}),
+		OauthStateHandler: OauthStateHandlerFunc(func(params OauthStateParams) middleware.Responder {
+			return middleware.NotImplemented("operation OauthState has not yet been implemented")
 		}),
 		RefreshTokenHandler: RefreshTokenHandlerFunc(func(params RefreshTokenParams) middleware.Responder {
 			return middleware.NotImplemented("operation RefreshToken has not yet been implemented")
@@ -78,10 +78,10 @@ type UserPrivateAPI struct {
 
 	// LogoutHandler sets the operation handler for the logout operation
 	LogoutHandler LogoutHandler
-	// NewOauthStateHandler sets the operation handler for the new oauth state operation
-	NewOauthStateHandler NewOauthStateHandler
 	// OauthJumpHandler sets the operation handler for the oauth jump operation
 	OauthJumpHandler OauthJumpHandler
+	// OauthStateHandler sets the operation handler for the oauth state operation
+	OauthStateHandler OauthStateHandler
 	// RefreshTokenHandler sets the operation handler for the refresh token operation
 	RefreshTokenHandler RefreshTokenHandler
 
@@ -151,12 +151,12 @@ func (o *UserPrivateAPI) Validate() error {
 		unregistered = append(unregistered, "LogoutHandler")
 	}
 
-	if o.NewOauthStateHandler == nil {
-		unregistered = append(unregistered, "NewOauthStateHandler")
-	}
-
 	if o.OauthJumpHandler == nil {
 		unregistered = append(unregistered, "OauthJumpHandler")
+	}
+
+	if o.OauthStateHandler == nil {
+		unregistered = append(unregistered, "OauthStateHandler")
 	}
 
 	if o.RefreshTokenHandler == nil {
@@ -261,12 +261,12 @@ func (o *UserPrivateAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/token/oauthState"] = NewNewOauthState(o.context, o.NewOauthStateHandler)
+	o.handlers["POST"]["/token/oauthJump"] = NewOauthJump(o.context, o.OauthJumpHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/token/oauthJump"] = NewOauthJump(o.context, o.OauthJumpHandler)
+	o.handlers["POST"]["/token/oauthState"] = NewOauthState(o.context, o.OauthStateHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -286,7 +286,7 @@ func (o *UserPrivateAPI) Serve(builder middleware.Builder) http.Handler {
 	return o.context.APIHandler(builder)
 }
 
-// Init allows you to just initialize the handler cache, you can then recompose the middelware as you see fit
+// Init allows you to just initialize the handler cache, you can then recompose the middleware as you see fit
 func (o *UserPrivateAPI) Init() {
 	if len(o.handlers) == 0 {
 		o.initHandlerCache()

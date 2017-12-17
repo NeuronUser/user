@@ -30,13 +30,18 @@ func NewOauthJumpParams() OauthJumpParams {
 type OauthJumpParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*
 	  Required: true
 	  In: query
 	*/
 	AuthorizationCode string
+	/*
+	  Required: true
+	  In: query
+	*/
+	RedirectURI string
 	/*
 	  Required: true
 	  In: query
@@ -54,6 +59,11 @@ func (o *OauthJumpParams) BindRequest(r *http.Request, route *middleware.Matched
 
 	qAuthorizationCode, qhkAuthorizationCode, _ := qs.GetOK("authorizationCode")
 	if err := o.bindAuthorizationCode(qAuthorizationCode, qhkAuthorizationCode, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qRedirectURI, qhkRedirectURI, _ := qs.GetOK("redirectUri")
+	if err := o.bindRedirectURI(qRedirectURI, qhkRedirectURI, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -81,6 +91,23 @@ func (o *OauthJumpParams) bindAuthorizationCode(rawData []string, hasKey bool, f
 	}
 
 	o.AuthorizationCode = raw
+
+	return nil
+}
+
+func (o *OauthJumpParams) bindRedirectURI(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("redirectUri", "query")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+	if err := validate.RequiredString("redirectUri", "query", raw); err != nil {
+		return err
+	}
+
+	o.RedirectURI = raw
 
 	return nil
 }

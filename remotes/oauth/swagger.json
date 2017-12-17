@@ -10,8 +10,7 @@
   },
   "basePath": "/api/v1/oauth",
   "schemes": [
-    "http",
-    "https"
+    "http"
   ],
   "consumes": [
     "application/json"
@@ -25,50 +24,6 @@
     }
   },
   "parameters": {
-  },
-  "responses": {
-    "ErrorResponse": {
-      "description": "Error response",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "default": "Http status",
-            "type": "string",
-            "format": "int32"
-          },
-          "code": {
-            "description": "Error code",
-            "type": "string"
-          },
-          "message": {
-            "description": "Error message",
-            "type": "string"
-          },
-          "errors": {
-            "description": "Errors",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "field": {
-                  "description": "field name",
-                  "type": "string"
-                },
-                "code": {
-                  "description": "error code",
-                  "type": "string"
-                },
-                "message": {
-                  "description": "error message",
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
   },
   "paths": {
     "/token": {
@@ -130,9 +85,6 @@
             "schema": {
               "$ref": "#/definitions/AccessToken"
             }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
           }
         }
       }
@@ -155,9 +107,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
           }
         }
       }

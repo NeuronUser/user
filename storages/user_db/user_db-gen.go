@@ -63,8 +63,9 @@ const OAUTH_STATE_FIELD_OAUTH_STATE = OAUTH_STATE_FIELD("oauth_state")
 const OAUTH_STATE_FIELD_STATE_USED = OAUTH_STATE_FIELD("state_used")
 const OAUTH_STATE_FIELD_CREATE_TIME = OAUTH_STATE_FIELD("create_time")
 const OAUTH_STATE_FIELD_UPDATE_TIME = OAUTH_STATE_FIELD("update_time")
+const OAUTH_STATE_FIELD_QUERY_STRING = OAUTH_STATE_FIELD("query_string")
 
-const OAUTH_STATE_ALL_FIELDS_STRING = "id,oauth_state,state_used,create_time,update_time"
+const OAUTH_STATE_ALL_FIELDS_STRING = "id,oauth_state,state_used,create_time,update_time,query_string"
 
 var OAUTH_STATE_ALL_FIELDS = []string{
 	"id",
@@ -72,14 +73,16 @@ var OAUTH_STATE_ALL_FIELDS = []string{
 	"state_used",
 	"create_time",
 	"update_time",
+	"query_string",
 }
 
 type OauthState struct {
-	Id         int64  //size=20
-	OauthState string //size=128
-	StateUsed  int32  //size=1
-	CreateTime time.Time
-	UpdateTime time.Time
+	Id          int64  //size=20
+	OauthState  string //size=128
+	StateUsed   int32  //size=1
+	CreateTime  time.Time
+	UpdateTime  time.Time
+	QueryString string //size=256
 }
 
 type OauthStateQuery struct {
@@ -256,6 +259,24 @@ func (q *OauthStateQuery) UpdateTime_Greater(v time.Time) *OauthStateQuery {
 func (q *OauthStateQuery) UpdateTime_GreaterEqual(v time.Time) *OauthStateQuery {
 	return q.w("update_time>='" + fmt.Sprint(v) + "'")
 }
+func (q *OauthStateQuery) QueryString_Equal(v string) *OauthStateQuery {
+	return q.w("query_string='" + fmt.Sprint(v) + "'")
+}
+func (q *OauthStateQuery) QueryString_NotEqual(v string) *OauthStateQuery {
+	return q.w("query_string<>'" + fmt.Sprint(v) + "'")
+}
+func (q *OauthStateQuery) QueryString_Less(v string) *OauthStateQuery {
+	return q.w("query_string<'" + fmt.Sprint(v) + "'")
+}
+func (q *OauthStateQuery) QueryString_LessEqual(v string) *OauthStateQuery {
+	return q.w("query_string<='" + fmt.Sprint(v) + "'")
+}
+func (q *OauthStateQuery) QueryString_Greater(v string) *OauthStateQuery {
+	return q.w("query_string>'" + fmt.Sprint(v) + "'")
+}
+func (q *OauthStateQuery) QueryString_GreaterEqual(v string) *OauthStateQuery {
+	return q.w("query_string>='" + fmt.Sprint(v) + "'")
+}
 
 type OauthStateDao struct {
 	logger     *zap.Logger
@@ -296,12 +317,12 @@ func (dao *OauthStateDao) init() (err error) {
 	return nil
 }
 func (dao *OauthStateDao) prepareInsertStmt() (err error) {
-	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO oauth_state (oauth_state,state_used) VALUES (?,?)")
+	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO oauth_state (oauth_state,state_used,query_string) VALUES (?,?,?)")
 	return err
 }
 
 func (dao *OauthStateDao) prepareUpdateStmt() (err error) {
-	dao.updateStmt, err = dao.db.Prepare(context.Background(), "UPDATE oauth_state SET oauth_state=?,state_used=? WHERE id=?")
+	dao.updateStmt, err = dao.db.Prepare(context.Background(), "UPDATE oauth_state SET oauth_state=?,state_used=?,query_string=? WHERE id=?")
 	return err
 }
 
@@ -316,7 +337,7 @@ func (dao *OauthStateDao) Insert(ctx context.Context, tx *wrap.Tx, e *OauthState
 		stmt = tx.Stmt(ctx, stmt)
 	}
 
-	result, err := stmt.Exec(ctx, e.OauthState, e.StateUsed)
+	result, err := stmt.Exec(ctx, e.OauthState, e.StateUsed, e.QueryString)
 	if err != nil {
 		return 0, err
 	}
@@ -335,7 +356,7 @@ func (dao *OauthStateDao) Update(ctx context.Context, tx *wrap.Tx, e *OauthState
 		stmt = tx.Stmt(ctx, stmt)
 	}
 
-	_, err = stmt.Exec(ctx, e.OauthState, e.StateUsed, e.Id)
+	_, err = stmt.Exec(ctx, e.OauthState, e.StateUsed, e.QueryString, e.Id)
 	if err != nil {
 		return err
 	}
@@ -359,7 +380,7 @@ func (dao *OauthStateDao) Delete(ctx context.Context, tx *wrap.Tx, id int64) (er
 
 func (dao *OauthStateDao) scanRow(row *wrap.Row) (*OauthState, error) {
 	e := &OauthState{}
-	err := row.Scan(&e.Id, &e.OauthState, &e.StateUsed, &e.CreateTime, &e.UpdateTime)
+	err := row.Scan(&e.Id, &e.OauthState, &e.StateUsed, &e.CreateTime, &e.UpdateTime, &e.QueryString)
 	if err != nil {
 		if err == wrap.ErrNoRows {
 			return nil, nil
@@ -375,7 +396,7 @@ func (dao *OauthStateDao) scanRows(rows *wrap.Rows) (list []*OauthState, err err
 	list = make([]*OauthState, 0)
 	for rows.Next() {
 		e := OauthState{}
-		err = rows.Scan(&e.Id, &e.OauthState, &e.StateUsed, &e.CreateTime, &e.UpdateTime)
+		err = rows.Scan(&e.Id, &e.OauthState, &e.StateUsed, &e.CreateTime, &e.UpdateTime, &e.QueryString)
 		if err != nil {
 			return nil, err
 		}

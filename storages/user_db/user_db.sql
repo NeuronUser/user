@@ -28,10 +28,11 @@ CREATE TABLE `oauth_state` (
   `state_used` tinyint(1) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `query_string` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_state` (`oauth_state`),
   KEY `idx_update` (`update_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,4 +105,4 @@ CREATE TABLE `user_token` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-09 22:53:13
+-- Dump completed on 2017-12-14 21:10:21

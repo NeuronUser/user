@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
+	"go.uber.org/zap"
 )
 
 // OauthJumpHandlerFunc turns a function with the right signature into a oauth jump handler
@@ -51,7 +52,11 @@ func (o *OauthJump) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	zap.L().Named("api").Info("OauthJump", zap.Any("request", &Params))
+
 	res := o.Handler.Handle(Params) // actually handle the request
+
+	zap.L().Named("api").Info("OauthJump", zap.Any("response", res))
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

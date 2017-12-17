@@ -16,7 +16,7 @@ import (
 
 // This file is safe to edit. Once it exists it will not be overwritten
 
-//go:generate swagger generate server --target ../gen --name  --spec ../swagger.json
+//go:generate swagger generate server --target ../gen --name  --spec ../swagger.json --template-dir /Users/god/work/neuron/src/github.com/NeuronFramework/restful/go_template/
 
 func configureFlags(api *operations.UserPrivateAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
@@ -39,11 +39,11 @@ func configureAPI(api *operations.UserPrivateAPI) http.Handler {
 	api.LogoutHandler = operations.LogoutHandlerFunc(func(params operations.LogoutParams) middleware.Responder {
 		return middleware.NotImplemented("operation .Logout has not yet been implemented")
 	})
-	api.NewOauthStateHandler = operations.NewOauthStateHandlerFunc(func(params operations.NewOauthStateParams) middleware.Responder {
-		return middleware.NotImplemented("operation .NewOauthState has not yet been implemented")
-	})
 	api.OauthJumpHandler = operations.OauthJumpHandlerFunc(func(params operations.OauthJumpParams) middleware.Responder {
 		return middleware.NotImplemented("operation .OauthJump has not yet been implemented")
+	})
+	api.OauthStateHandler = operations.OauthStateHandlerFunc(func(params operations.OauthStateParams) middleware.Responder {
+		return middleware.NotImplemented("operation .OauthState has not yet been implemented")
 	})
 	api.RefreshTokenHandler = operations.RefreshTokenHandlerFunc(func(params operations.RefreshTokenParams) middleware.Responder {
 		return middleware.NotImplemented("operation .RefreshToken has not yet been implemented")

@@ -20,7 +20,8 @@ func NewUserService() (s *UserService, err error) {
 	if err != nil {
 		return nil, err
 	}
-	s.oauthClient = client.NewHTTPClientWithConfig(nil, client.DefaultTransportConfig().WithHost("127.0.0.1:8084"))
+	s.oauthClient = client.NewHTTPClientWithConfig(nil,
+		client.DefaultTransportConfig().WithHost("127.0.0.1:8084"))
 
 	return s, nil
 }

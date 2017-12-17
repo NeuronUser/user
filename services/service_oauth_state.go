@@ -6,14 +6,15 @@ import (
 	"github.com/NeuronUser/user/storages/user_db"
 )
 
-func (s *UserService) NewOauthState(ctx context.Context) (state string, err error) {
+func (s *UserService) OauthState(ctx context.Context, queryString string) (state string, err error) {
 	dbState := &user_db.OauthState{}
-	dbState.OauthState = rand.NextBase64(16)
+	dbState.OauthState = rand.NextHex(16)
 	dbState.StateUsed = 0
+	dbState.QueryString = queryString
 	_, err = s.userDB.OauthState.Insert(ctx, nil, dbState)
 	if err != nil {
 		return "", err
 	}
 
-	return "", nil
+	return dbState.OauthState, nil
 }

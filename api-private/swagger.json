@@ -31,56 +31,18 @@
   },
   "parameters": {
   },
-  "responses": {
-    "ErrorResponse": {
-      "description": "Error response",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "default": "Http status",
-            "type": "string",
-            "format": "int32"
-          },
-          "code": {
-            "description": "Error code",
-            "type": "string"
-          },
-          "message": {
-            "description": "Error message",
-            "type": "string"
-          },
-          "errors": {
-            "description": "Errors",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "field": {
-                  "description": "field name",
-                  "type": "string"
-                },
-                "code": {
-                  "description": "error code",
-                  "type": "string"
-                },
-                "message": {
-                  "description": "error message",
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   "paths": {
     "/token/oauthState": {
       "post": {
         "summary": "",
-        "operationId": "NewOauthState",
+        "operationId": "OauthState",
         "parameters": [
+          {
+            "in": "query",
+            "name": "queryString",
+            "type": "string",
+            "required": true
+          }
         ],
         "responses": {
           "200": {
@@ -88,9 +50,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
           }
         }
       }
@@ -100,6 +59,12 @@
         "summary": "",
         "operationId": "OauthJump",
         "parameters": [
+          {
+            "in": "query",
+            "name": "redirectUri",
+            "type": "string",
+            "required": true
+          },
           {
             "in": "query",
             "name": "authorizationCode",
@@ -119,9 +84,6 @@
             "schema": {
               "$ref": "#/definitions/OauthJumpResponse"
             }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
           }
         }
       }
@@ -145,9 +107,6 @@
               "type": "string",
               "description": "token"
             }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
           }
         }
       }
@@ -173,9 +132,6 @@
         "responses": {
           "200": {
             "description": "ok"
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
           }
         }
       }
@@ -189,6 +145,9 @@
           "type": "string"
         },
         "refreshToken": {
+          "type": "string"
+        },
+        "queryString": {
           "type": "string"
         }
       }

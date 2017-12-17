@@ -1,13 +1,15 @@
 package handler
 
 import (
+	"context"
+	"fmt"
+	"github.com/NeuronFramework/errors"
 	"github.com/NeuronFramework/log"
-	"github.com/NeuronFramework/restful"
-	"github.com/NeuronUser/user/api-private/gen/models"
 	"github.com/NeuronUser/user/api-private/gen/restapi/operations"
 	"github.com/NeuronUser/user/services"
 	"github.com/go-openapi/runtime/middleware"
 	"go.uber.org/zap"
+	"reflect"
 )
 
 type UserHandler struct {
@@ -26,31 +28,29 @@ func NewUserHandler() (h *UserHandler, err error) {
 	return h, nil
 }
 
-func (h *UserHandler) NewOauthState(p operations.NewOauthStateParams) middleware.Responder {
-	state, err := h.service.NewOauthState(p.HTTPRequest.Context())
+func (h *UserHandler) OauthState(p operations.OauthStateParams) middleware.Responder {
+	state, err := h.service.OauthState(context.Background(), p.QueryString)
 	if err != nil {
-		return restful.Responder(err)
+		return errors.Wrap(err)
 	}
 
-	return operations.NewNewOauthStateOK().WithPayload(state)
+	return operations.NewOauthStateOK().WithPayload(state)
 }
 
 func (h *UserHandler) OauthJump(p operations.OauthJumpParams) middleware.Responder {
-	token, refreshToken, err := h.service.OauthJump(p.HTTPRequest.Context(), p.AuthorizationCode, p.State)
+	result, err := h.service.OauthJump(context.Background(), p.RedirectURI, p.AuthorizationCode, p.State)
 	if err != nil {
-		return restful.Responder(err)
+		fmt.Println("h *UserHandler) OauthJump", err, reflect.TypeOf(err))
+		return errors.Wrap(err)
 	}
 
-	return operations.NewOauthJumpOK().WithPayload(&models.OauthJumpResponse{
-		Token:        token,
-		RefreshToken: refreshToken,
-	})
+	return operations.NewOauthJumpOK().WithPayload(fromOauthJumpResponse(result))
 }
 
 func (h *UserHandler) RefreshToken(p operations.RefreshTokenParams) middleware.Responder {
-	token, err := h.service.RefreshToken(p.HTTPRequest.Context(), p.RefreshToken)
+	token, err := h.service.RefreshToken(context.Background(), p.RefreshToken)
 	if err != nil {
-		return restful.Responder(err)
+		return errors.Wrap(err)
 	}
 
 	return operations.NewRefreshTokenOK().WithPayload(token)
@@ -59,9 +59,9 @@ func (h *UserHandler) RefreshToken(p operations.RefreshTokenParams) middleware.R
 func (h *UserHandler) Logout(p operations.LogoutParams) middleware.Responder {
 	p.HTTPRequest.Context()
 
-	err := h.service.Logout(p.HTTPRequest.Context(), p.Token, p.RefreshToken)
+	err := h.service.Logout(context.Background(), p.Token, p.RefreshToken)
 	if err != nil {
-		return restful.Responder(err)
+		return errors.Wrap(err)
 	}
 
 	return operations.NewLogoutOK()

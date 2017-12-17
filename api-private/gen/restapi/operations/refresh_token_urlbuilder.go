@@ -11,11 +11,9 @@ import (
 	golangswaggerpaths "path"
 )
 
-// OauthJumpURL generates an URL for the oauth jump operation
-type OauthJumpURL struct {
-	AuthorizationCode string
-	RedirectURI       string
-	State             string
+// RefreshTokenURL generates an URL for the refresh token operation
+type RefreshTokenURL struct {
+	RefreshToken string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -25,7 +23,7 @@ type OauthJumpURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *OauthJumpURL) WithBasePath(bp string) *OauthJumpURL {
+func (o *RefreshTokenURL) WithBasePath(bp string) *RefreshTokenURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -33,15 +31,15 @@ func (o *OauthJumpURL) WithBasePath(bp string) *OauthJumpURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *OauthJumpURL) SetBasePath(bp string) {
+func (o *RefreshTokenURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *OauthJumpURL) Build() (*url.URL, error) {
+func (o *RefreshTokenURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/token/oauthJump"
+	var _path = "/token/refresh"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -51,19 +49,9 @@ func (o *OauthJumpURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	authorizationCode := o.AuthorizationCode
-	if authorizationCode != "" {
-		qs.Set("authorizationCode", authorizationCode)
-	}
-
-	redirectURI := o.RedirectURI
-	if redirectURI != "" {
-		qs.Set("redirectUri", redirectURI)
-	}
-
-	state := o.State
-	if state != "" {
-		qs.Set("state", state)
+	refreshToken := o.RefreshToken
+	if refreshToken != "" {
+		qs.Set("refreshToken", refreshToken)
 	}
 
 	result.RawQuery = qs.Encode()
@@ -72,7 +60,7 @@ func (o *OauthJumpURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *OauthJumpURL) Must(u *url.URL, err error) *url.URL {
+func (o *RefreshTokenURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -83,17 +71,17 @@ func (o *OauthJumpURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *OauthJumpURL) String() string {
+func (o *RefreshTokenURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *OauthJumpURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *RefreshTokenURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on OauthJumpURL")
+		return nil, errors.New("scheme is required for a full url on RefreshTokenURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on OauthJumpURL")
+		return nil, errors.New("host is required for a full url on RefreshTokenURL")
 	}
 
 	base, err := o.Build()
@@ -107,6 +95,6 @@ func (o *OauthJumpURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *OauthJumpURL) StringFull(scheme, host string) string {
+func (o *RefreshTokenURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }
