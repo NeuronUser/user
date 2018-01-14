@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"github.com/NeuronFramework/rand"
 	"github.com/NeuronFramework/restful/pointers"
 	"github.com/NeuronFramework/sql/wrap"
@@ -28,7 +27,7 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 		return nil, errors.InvalidParam("state", "无效的state")
 	}
 
-	//get access token
+	//remote get access token
 	tokenParams := &operations.TokenParams{}
 	tokenParams.Context = ctx
 	tokenParams.GrantType = "authorization_code"
@@ -41,28 +40,20 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 				"Basic "+base64.StdEncoding.EncodeToString(([]byte)("100001"+":"+"100001")))
 		}))
 
-	fmt.Println("OauthJump", apiErr)
 	if apiErr != nil {
-		fmt.Println("OauthJump 111", apiErr)
 		return nil, err
 	}
-
-	fmt.Println("OauthJump 333")
-
 	accessToken := tokenOk.Payload
 	if accessToken == nil {
 		return nil, errors.InvalidParam("accessToken", "accessToken nil")
 	}
 
-	fmt.Println("OauthJump 444")
-
-	//get account id
+	//remote get account id
 	meParams := &operations.MeParams{}
 	meParams.Context = ctx
 	meParams.AccessToken = accessToken.AccessToken
 	meOk, apiError := s.oauthClient.Operations.Me(meParams)
 	if apiError != nil {
-		fmt.Println("OauthJump ", apiError)
 		return nil, apiError
 	}
 	accountId := meOk.Payload
@@ -70,21 +61,7 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 		return nil, errors.InvalidParam("accountId", "accountId nil")
 	}
 
-	fmt.Println("OauthJump 555")
-
-	expiresTime := time.Now().Add(time.Hour)
-
-	userToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Subject:   accountId,
-		ExpiresAt: expiresTime.Unix(),
-	})
-	tokenString, err := userToken.SignedString([]byte("0123456789"))
-	if err != nil {
-		return nil, err
-	}
-
-	refreshToken := rand.NextHex(16)
-
+	//store oauth access token and account
 	dbOauthTokens := &user_db.OauthTokens{}
 	dbOauthTokens.AuthorizationCode = authorizationCode
 	dbOauthTokens.AccessToken = accessToken.AccessToken
@@ -95,6 +72,16 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 		return nil, err
 	}
 
+	//generate user token
+	expiresTime := time.Now().Add(time.Hour)
+	userToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Subject:   accountId,
+		ExpiresAt: expiresTime.Unix(),
+	})
+	tokenString, err := userToken.SignedString([]byte("0123456789"))
+	if err != nil {
+		return nil, err
+	}
 	dbUserToken := &user_db.UserToken{}
 	dbUserToken.AccountId = accountId
 	dbUserToken.ExpiresTime = expiresTime
@@ -104,30 +91,49 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 		return nil, err
 	}
 
-	err = s.userDB.TransactionReadCommitted(ctx, func(tx *wrap.Tx) (err error) {
-		dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().AccountId_Equal(accountId).QueryOne(ctx, tx)
-		if dbRefreshToken == nil {
-			dbRefreshToken = &user_db.RefreshToken{}
-			dbRefreshToken.AccountId = accountId
-			dbRefreshToken.RefreshToken = refreshToken
-			_, err = s.userDB.RefreshToken.Insert(ctx, tx, dbRefreshToken)
-			if err != nil {
-				return err
-			}
-		} else {
-			dbRefreshToken.RefreshToken = refreshToken
-			err = s.userDB.RefreshToken.Update(ctx, tx, dbRefreshToken)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
+	//generate user refresh token
+	refreshToken := rand.NextHex(16)
+	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().AccountId_Equal(accountId).QueryOne(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
+	if dbRefreshToken != nil {
+		dbRefreshToken.RefreshToken = refreshToken
+		err = s.userDB.RefreshToken.Update(ctx, nil, dbRefreshToken)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = s.userDB.TransactionReadCommitted(ctx, false, func(tx *wrap.Tx) (err error) {
+			dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().AccountId_Equal(accountId).QueryOne(ctx, tx)
+			if err != nil {
+				return err
+			}
 
+			if dbRefreshToken == nil {
+				dbRefreshToken = &user_db.RefreshToken{}
+				dbRefreshToken.AccountId = accountId
+				dbRefreshToken.RefreshToken = refreshToken
+				_, err = s.userDB.RefreshToken.Insert(ctx, tx, dbRefreshToken)
+				if err != nil {
+					return err
+				}
+			} else {
+				dbRefreshToken.RefreshToken = refreshToken
+				err = s.userDB.RefreshToken.Update(ctx, tx, dbRefreshToken)
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	//update state used
 	dbState.StateUsed = 1
 	err = s.userDB.OauthState.Update(ctx, nil, dbState)
 	if err != nil {

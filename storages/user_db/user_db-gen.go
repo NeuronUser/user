@@ -3,14 +3,18 @@ package user_db
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/NeuronFramework/log"
 	"github.com/NeuronFramework/sql/wrap"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"go.uber.org/zap"
 	"strings"
 	"time"
 )
+
+var _ = sql.ErrNoRows
+var _ = mysql.ErrOldProtocol
 
 type BaseQuery struct {
 	forUpdate     bool
@@ -77,7 +81,7 @@ var OAUTH_STATE_ALL_FIELDS = []string{
 }
 
 type OauthState struct {
-	Id          int64  //size=20
+	Id          uint64 //size=20
 	OauthState  string //size=128
 	StateUsed   int32  //size=1
 	CreateTime  time.Time
@@ -175,16 +179,18 @@ func (q *OauthStateQuery) And() *OauthStateQuery   { return q.w(" AND ") }
 func (q *OauthStateQuery) Or() *OauthStateQuery    { return q.w(" OR ") }
 func (q *OauthStateQuery) Not() *OauthStateQuery   { return q.w(" NOT ") }
 
-func (q *OauthStateQuery) Id_Equal(v int64) *OauthStateQuery { return q.w("id='" + fmt.Sprint(v) + "'") }
-func (q *OauthStateQuery) Id_NotEqual(v int64) *OauthStateQuery {
+func (q *OauthStateQuery) Id_Equal(v uint64) *OauthStateQuery { return q.w("id='" + fmt.Sprint(v) + "'") }
+func (q *OauthStateQuery) Id_NotEqual(v uint64) *OauthStateQuery {
 	return q.w("id<>'" + fmt.Sprint(v) + "'")
 }
-func (q *OauthStateQuery) Id_Less(v int64) *OauthStateQuery { return q.w("id<'" + fmt.Sprint(v) + "'") }
-func (q *OauthStateQuery) Id_LessEqual(v int64) *OauthStateQuery {
+func (q *OauthStateQuery) Id_Less(v uint64) *OauthStateQuery { return q.w("id<'" + fmt.Sprint(v) + "'") }
+func (q *OauthStateQuery) Id_LessEqual(v uint64) *OauthStateQuery {
 	return q.w("id<='" + fmt.Sprint(v) + "'")
 }
-func (q *OauthStateQuery) Id_Greater(v int64) *OauthStateQuery { return q.w("id>'" + fmt.Sprint(v) + "'") }
-func (q *OauthStateQuery) Id_GreaterEqual(v int64) *OauthStateQuery {
+func (q *OauthStateQuery) Id_Greater(v uint64) *OauthStateQuery {
+	return q.w("id>'" + fmt.Sprint(v) + "'")
+}
+func (q *OauthStateQuery) Id_GreaterEqual(v uint64) *OauthStateQuery {
 	return q.w("id>='" + fmt.Sprint(v) + "'")
 }
 func (q *OauthStateQuery) OauthState_Equal(v string) *OauthStateQuery {
@@ -364,7 +370,7 @@ func (dao *OauthStateDao) Update(ctx context.Context, tx *wrap.Tx, e *OauthState
 	return nil
 }
 
-func (dao *OauthStateDao) Delete(ctx context.Context, tx *wrap.Tx, id int64) (err error) {
+func (dao *OauthStateDao) Delete(ctx context.Context, tx *wrap.Tx, id uint64) (err error) {
 	stmt := dao.deleteStmt
 	if tx != nil {
 		stmt = tx.Stmt(ctx, stmt)
@@ -496,7 +502,7 @@ var OAUTH_TOKENS_ALL_FIELDS = []string{
 }
 
 type OauthTokens struct {
-	Id                int64  //size=20
+	Id                uint64 //size=20
 	AccountId         string //size=128
 	AuthorizationCode string //size=128
 	AccessToken       string //size=1024
@@ -595,18 +601,20 @@ func (q *OauthTokensQuery) And() *OauthTokensQuery   { return q.w(" AND ") }
 func (q *OauthTokensQuery) Or() *OauthTokensQuery    { return q.w(" OR ") }
 func (q *OauthTokensQuery) Not() *OauthTokensQuery   { return q.w(" NOT ") }
 
-func (q *OauthTokensQuery) Id_Equal(v int64) *OauthTokensQuery { return q.w("id='" + fmt.Sprint(v) + "'") }
-func (q *OauthTokensQuery) Id_NotEqual(v int64) *OauthTokensQuery {
+func (q *OauthTokensQuery) Id_Equal(v uint64) *OauthTokensQuery {
+	return q.w("id='" + fmt.Sprint(v) + "'")
+}
+func (q *OauthTokensQuery) Id_NotEqual(v uint64) *OauthTokensQuery {
 	return q.w("id<>'" + fmt.Sprint(v) + "'")
 }
-func (q *OauthTokensQuery) Id_Less(v int64) *OauthTokensQuery { return q.w("id<'" + fmt.Sprint(v) + "'") }
-func (q *OauthTokensQuery) Id_LessEqual(v int64) *OauthTokensQuery {
+func (q *OauthTokensQuery) Id_Less(v uint64) *OauthTokensQuery { return q.w("id<'" + fmt.Sprint(v) + "'") }
+func (q *OauthTokensQuery) Id_LessEqual(v uint64) *OauthTokensQuery {
 	return q.w("id<='" + fmt.Sprint(v) + "'")
 }
-func (q *OauthTokensQuery) Id_Greater(v int64) *OauthTokensQuery {
+func (q *OauthTokensQuery) Id_Greater(v uint64) *OauthTokensQuery {
 	return q.w("id>'" + fmt.Sprint(v) + "'")
 }
-func (q *OauthTokensQuery) Id_GreaterEqual(v int64) *OauthTokensQuery {
+func (q *OauthTokensQuery) Id_GreaterEqual(v uint64) *OauthTokensQuery {
 	return q.w("id>='" + fmt.Sprint(v) + "'")
 }
 func (q *OauthTokensQuery) AccountId_Equal(v string) *OauthTokensQuery {
@@ -804,7 +812,7 @@ func (dao *OauthTokensDao) Update(ctx context.Context, tx *wrap.Tx, e *OauthToke
 	return nil
 }
 
-func (dao *OauthTokensDao) Delete(ctx context.Context, tx *wrap.Tx, id int64) (err error) {
+func (dao *OauthTokensDao) Delete(ctx context.Context, tx *wrap.Tx, id uint64) (err error) {
 	stmt := dao.deleteStmt
 	if tx != nil {
 		stmt = tx.Stmt(ctx, stmt)
@@ -932,7 +940,7 @@ var REFRESH_TOKEN_ALL_FIELDS = []string{
 }
 
 type RefreshToken struct {
-	Id           int64  //size=20
+	Id           uint64 //size=20
 	AccountId    string //size=128
 	RefreshToken string //size=128
 	CreateTime   time.Time
@@ -1029,22 +1037,22 @@ func (q *RefreshTokenQuery) And() *RefreshTokenQuery   { return q.w(" AND ") }
 func (q *RefreshTokenQuery) Or() *RefreshTokenQuery    { return q.w(" OR ") }
 func (q *RefreshTokenQuery) Not() *RefreshTokenQuery   { return q.w(" NOT ") }
 
-func (q *RefreshTokenQuery) Id_Equal(v int64) *RefreshTokenQuery {
+func (q *RefreshTokenQuery) Id_Equal(v uint64) *RefreshTokenQuery {
 	return q.w("id='" + fmt.Sprint(v) + "'")
 }
-func (q *RefreshTokenQuery) Id_NotEqual(v int64) *RefreshTokenQuery {
+func (q *RefreshTokenQuery) Id_NotEqual(v uint64) *RefreshTokenQuery {
 	return q.w("id<>'" + fmt.Sprint(v) + "'")
 }
-func (q *RefreshTokenQuery) Id_Less(v int64) *RefreshTokenQuery {
+func (q *RefreshTokenQuery) Id_Less(v uint64) *RefreshTokenQuery {
 	return q.w("id<'" + fmt.Sprint(v) + "'")
 }
-func (q *RefreshTokenQuery) Id_LessEqual(v int64) *RefreshTokenQuery {
+func (q *RefreshTokenQuery) Id_LessEqual(v uint64) *RefreshTokenQuery {
 	return q.w("id<='" + fmt.Sprint(v) + "'")
 }
-func (q *RefreshTokenQuery) Id_Greater(v int64) *RefreshTokenQuery {
+func (q *RefreshTokenQuery) Id_Greater(v uint64) *RefreshTokenQuery {
 	return q.w("id>'" + fmt.Sprint(v) + "'")
 }
-func (q *RefreshTokenQuery) Id_GreaterEqual(v int64) *RefreshTokenQuery {
+func (q *RefreshTokenQuery) Id_GreaterEqual(v uint64) *RefreshTokenQuery {
 	return q.w("id>='" + fmt.Sprint(v) + "'")
 }
 func (q *RefreshTokenQuery) AccountId_Equal(v string) *RefreshTokenQuery {
@@ -1206,7 +1214,7 @@ func (dao *RefreshTokenDao) Update(ctx context.Context, tx *wrap.Tx, e *RefreshT
 	return nil
 }
 
-func (dao *RefreshTokenDao) Delete(ctx context.Context, tx *wrap.Tx, id int64) (err error) {
+func (dao *RefreshTokenDao) Delete(ctx context.Context, tx *wrap.Tx, id uint64) (err error) {
 	stmt := dao.deleteStmt
 	if tx != nil {
 		stmt = tx.Stmt(ctx, stmt)
@@ -1336,7 +1344,7 @@ var USER_TOKEN_ALL_FIELDS = []string{
 }
 
 type UserToken struct {
-	Id          int64  //size=20
+	Id          uint64 //size=20
 	AccountId   string //size=128
 	ExpiresTime time.Time
 	UserToken   string //size=1024
@@ -1434,14 +1442,16 @@ func (q *UserTokenQuery) And() *UserTokenQuery   { return q.w(" AND ") }
 func (q *UserTokenQuery) Or() *UserTokenQuery    { return q.w(" OR ") }
 func (q *UserTokenQuery) Not() *UserTokenQuery   { return q.w(" NOT ") }
 
-func (q *UserTokenQuery) Id_Equal(v int64) *UserTokenQuery    { return q.w("id='" + fmt.Sprint(v) + "'") }
-func (q *UserTokenQuery) Id_NotEqual(v int64) *UserTokenQuery { return q.w("id<>'" + fmt.Sprint(v) + "'") }
-func (q *UserTokenQuery) Id_Less(v int64) *UserTokenQuery     { return q.w("id<'" + fmt.Sprint(v) + "'") }
-func (q *UserTokenQuery) Id_LessEqual(v int64) *UserTokenQuery {
+func (q *UserTokenQuery) Id_Equal(v uint64) *UserTokenQuery { return q.w("id='" + fmt.Sprint(v) + "'") }
+func (q *UserTokenQuery) Id_NotEqual(v uint64) *UserTokenQuery {
+	return q.w("id<>'" + fmt.Sprint(v) + "'")
+}
+func (q *UserTokenQuery) Id_Less(v uint64) *UserTokenQuery { return q.w("id<'" + fmt.Sprint(v) + "'") }
+func (q *UserTokenQuery) Id_LessEqual(v uint64) *UserTokenQuery {
 	return q.w("id<='" + fmt.Sprint(v) + "'")
 }
-func (q *UserTokenQuery) Id_Greater(v int64) *UserTokenQuery { return q.w("id>'" + fmt.Sprint(v) + "'") }
-func (q *UserTokenQuery) Id_GreaterEqual(v int64) *UserTokenQuery {
+func (q *UserTokenQuery) Id_Greater(v uint64) *UserTokenQuery { return q.w("id>'" + fmt.Sprint(v) + "'") }
+func (q *UserTokenQuery) Id_GreaterEqual(v uint64) *UserTokenQuery {
 	return q.w("id>='" + fmt.Sprint(v) + "'")
 }
 func (q *UserTokenQuery) AccountId_Equal(v string) *UserTokenQuery {
@@ -1621,7 +1631,7 @@ func (dao *UserTokenDao) Update(ctx context.Context, tx *wrap.Tx, e *UserToken) 
 	return nil
 }
 
-func (dao *UserTokenDao) Delete(ctx context.Context, tx *wrap.Tx, id int64) (err error) {
+func (dao *UserTokenDao) Delete(ctx context.Context, tx *wrap.Tx, id uint64) (err error) {
 	stmt := dao.deleteStmt
 	if tx != nil {
 		stmt = tx.Stmt(ctx, stmt)

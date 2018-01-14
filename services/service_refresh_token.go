@@ -8,7 +8,9 @@ import (
 )
 
 func (s *UserService) RefreshToken(ctx context.Context, refreshToken string) (tokenString string, err error) {
-	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().RefreshToken_Equal(refreshToken).QueryOne(ctx, nil)
+	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().
+		RefreshToken_Equal(refreshToken).
+		QueryOne(ctx, nil)
 	if err != nil {
 		return "", err
 	}
