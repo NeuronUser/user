@@ -39,9 +39,8 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 			return req.SetHeaderParam("Authorization",
 				"Basic "+base64.StdEncoding.EncodeToString(([]byte)("100001"+":"+"100001")))
 		}))
-
 	if apiErr != nil {
-		return nil, err
+		return nil, apiErr
 	}
 	accessToken := tokenOk.Payload
 	if accessToken == nil {

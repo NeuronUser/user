@@ -2,14 +2,12 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/NeuronFramework/errors"
 	"github.com/NeuronFramework/log"
 	"github.com/NeuronUser/user/api-private/gen/restapi/operations"
 	"github.com/NeuronUser/user/services"
 	"github.com/go-openapi/runtime/middleware"
 	"go.uber.org/zap"
-	"reflect"
 )
 
 type UserHandler struct {
@@ -40,7 +38,6 @@ func (h *UserHandler) OauthState(p operations.OauthStateParams) middleware.Respo
 func (h *UserHandler) OauthJump(p operations.OauthJumpParams) middleware.Responder {
 	result, err := h.service.OauthJump(context.Background(), p.RedirectURI, p.AuthorizationCode, p.State)
 	if err != nil {
-		fmt.Println("h *UserHandler) OauthJump", err, reflect.TypeOf(err))
 		return errors.Wrap(err)
 	}
 
