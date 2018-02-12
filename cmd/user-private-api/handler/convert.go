@@ -5,14 +5,25 @@ import (
 	"github.com/NeuronUser/user/models"
 )
 
+func fromToken(p *models.Token) (r *api.Token) {
+	if p == nil {
+		return nil
+	}
+
+	r = &api.Token{}
+	r.AccessToken = p.AccessToken
+	r.RefreshToken = p.RefreshToken
+
+	return r
+}
+
 func fromOauthJumpResponse(p *models.OauthJumpResponse) (r *api.OauthJumpResponse) {
 	if p == nil {
 		return nil
 	}
 
 	r = &api.OauthJumpResponse{}
-	r.Token = p.TokenString
-	r.RefreshToken = p.RefreshToken
+	r.Token = fromToken(p.Token)
 	r.QueryString = p.QueryString
 
 	return r

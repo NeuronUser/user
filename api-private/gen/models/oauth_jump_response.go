@@ -13,26 +13,47 @@ import (
 )
 
 // OauthJumpResponse oauth jump response
-// swagger:model OauthJumpResponse
+// swagger:model oauthJumpResponse
 type OauthJumpResponse struct {
 
 	// query string
 	QueryString string `json:"queryString,omitempty"`
 
-	// refresh token
-	RefreshToken string `json:"refreshToken,omitempty"`
-
 	// token
-	Token string `json:"token,omitempty"`
+	Token *Token `json:"token,omitempty"`
 }
 
 // Validate validates this oauth jump response
 func (m *OauthJumpResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateToken(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *OauthJumpResponse) validateToken(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Token) { // not required
+		return nil
+	}
+
+	if m.Token != nil {
+
+		if err := m.Token.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("token")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

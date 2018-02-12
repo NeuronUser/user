@@ -2,38 +2,43 @@ package services
 
 import (
 	"context"
+	"github.com/NeuronUser/user/models"
 	"github.com/NeuronUser/user/storages/user_db"
 	"github.com/dgrijalva/jwt-go"
 	"time"
 )
 
-func (s *UserService) RefreshToken(ctx context.Context, refreshToken string) (tokenString string, err error) {
+func (s *UserService) RefreshToken(ctx context.Context, refreshToken string) (token *models.Token, err error) {
 	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().
 		RefreshToken_Equal(refreshToken).
 		QueryOne(ctx, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	expiresTime := time.Now().Add(time.Hour)
+	expiresTime := time.Now().Add(time.Second * models.UserAccessTokenExpireSeconds)
 
 	userToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   dbRefreshToken.AccountId,
 		ExpiresAt: expiresTime.Unix(),
 	})
-	tokenString, err = userToken.SignedString("0123456789")
+	accessToken, err := userToken.SignedString([]byte("0123456789"))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	dbUserToken := &user_db.UserToken{}
 	dbUserToken.AccountId = dbRefreshToken.AccountId
-	dbUserToken.UserToken = tokenString
+	dbUserToken.UserToken = accessToken
 	dbUserToken.ExpiresTime = expiresTime
 	_, err = s.userDB.UserToken.Insert(ctx, nil, dbUserToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return tokenString, nil
+	token = &models.Token{}
+	token.AccessToken = accessToken
+	token.RefreshToken = dbRefreshToken.RefreshToken
+
+	return token, nil
 }

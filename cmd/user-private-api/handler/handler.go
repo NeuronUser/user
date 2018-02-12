@@ -50,7 +50,7 @@ func (h *UserHandler) RefreshToken(p operations.RefreshTokenParams) middleware.R
 		return errors.Wrap(err)
 	}
 
-	return operations.NewRefreshTokenOK().WithPayload(token)
+	return operations.NewRefreshTokenOK().WithPayload(fromToken(token))
 }
 
 func (h *UserHandler) Logout(p operations.LogoutParams) middleware.Responder {

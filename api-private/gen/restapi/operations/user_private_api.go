@@ -36,16 +36,16 @@ func NewUserPrivateAPI(spec *loads.Document) *UserPrivateAPI {
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
 		LogoutHandler: LogoutHandlerFunc(func(params LogoutParams) middleware.Responder {
-			return middleware.NotImplemented("operation Logout has not yet been implemented")
+			panic("operation Logout has not yet been implemented")
 		}),
 		OauthJumpHandler: OauthJumpHandlerFunc(func(params OauthJumpParams) middleware.Responder {
-			return middleware.NotImplemented("operation OauthJump has not yet been implemented")
+			panic("operation OauthJump has not yet been implemented")
 		}),
 		OauthStateHandler: OauthStateHandlerFunc(func(params OauthStateParams) middleware.Responder {
-			return middleware.NotImplemented("operation OauthState has not yet been implemented")
+			panic("operation OauthState has not yet been implemented")
 		}),
 		RefreshTokenHandler: RefreshTokenHandlerFunc(func(params RefreshTokenParams) middleware.Responder {
-			return middleware.NotImplemented("operation RefreshToken has not yet been implemented")
+			panic("operation RefreshToken has not yet been implemented")
 		}),
 	}
 }

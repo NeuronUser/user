@@ -85,7 +85,7 @@ func init() {
           "200": {
             "description": "ok",
             "schema": {
-              "$ref": "#/definitions/OauthJumpResponse"
+              "$ref": "#/definitions/oauthJumpResponse"
             }
           }
         }
@@ -127,8 +127,7 @@ func init() {
           "200": {
             "description": "ok",
             "schema": {
-              "description": "token",
-              "type": "string"
+              "$ref": "#/definitions/token"
             }
           }
         }
@@ -136,16 +135,25 @@ func init() {
     }
   },
   "definitions": {
-    "OauthJumpResponse": {
+    "oauthJumpResponse": {
       "type": "object",
       "properties": {
         "queryString": {
           "type": "string"
         },
-        "refreshToken": {
+        "token": {
+          "type": "object",
+          "$ref": "#/definitions/token"
+        }
+      }
+    },
+    "token": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
           "type": "string"
         },
-        "token": {
+        "refreshToken": {
           "type": "string"
         }
       }
@@ -234,7 +242,7 @@ func init() {
           "200": {
             "description": "ok",
             "schema": {
-              "$ref": "#/definitions/OauthJumpResponse"
+              "$ref": "#/definitions/oauthJumpResponse"
             }
           }
         }
@@ -276,8 +284,7 @@ func init() {
           "200": {
             "description": "ok",
             "schema": {
-              "description": "token",
-              "type": "string"
+              "$ref": "#/definitions/token"
             }
           }
         }
@@ -285,16 +292,25 @@ func init() {
     }
   },
   "definitions": {
-    "OauthJumpResponse": {
+    "oauthJumpResponse": {
       "type": "object",
       "properties": {
         "queryString": {
           "type": "string"
         },
-        "refreshToken": {
+        "token": {
+          "type": "object",
+          "$ref": "#/definitions/token"
+        }
+      }
+    },
+    "token": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
           "type": "string"
         },
-        "token": {
+        "refreshToken": {
           "type": "string"
         }
       }

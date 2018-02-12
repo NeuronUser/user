@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	"github.com/NeuronUser/user/api-private/gen/models"
 )
 
 // RefreshTokenOKCode is the HTTP code returned for type RefreshTokenOK
@@ -20,10 +22,10 @@ swagger:response refreshTokenOK
 */
 type RefreshTokenOK struct {
 
-	/*token
+	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload *models.Token `json:"body,omitempty"`
 }
 
 // NewRefreshTokenOK creates RefreshTokenOK with default headers values
@@ -32,13 +34,13 @@ func NewRefreshTokenOK() *RefreshTokenOK {
 }
 
 // WithPayload adds the payload to the refresh token o k response
-func (o *RefreshTokenOK) WithPayload(payload string) *RefreshTokenOK {
+func (o *RefreshTokenOK) WithPayload(payload *models.Token) *RefreshTokenOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the refresh token o k response
-func (o *RefreshTokenOK) SetPayload(payload string) {
+func (o *RefreshTokenOK) SetPayload(payload *models.Token) {
 	o.Payload = payload
 }
 
@@ -46,9 +48,10 @@ func (o *RefreshTokenOK) SetPayload(payload string) {
 func (o *RefreshTokenOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }

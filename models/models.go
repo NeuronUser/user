@@ -1,7 +1,11 @@
 package models
 
-type OauthJumpResponse struct {
-	TokenString  string
+type Token struct {
+	AccessToken  string
 	RefreshToken string
-	QueryString  string
+}
+
+type OauthJumpResponse struct {
+	Token       *Token
+	QueryString string
 }

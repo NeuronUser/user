@@ -42,15 +42,15 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	if apiErr != nil {
 		return nil, apiErr
 	}
-	accessToken := tokenOk.Payload
-	if accessToken == nil {
+	oauthAccessToken := tokenOk.Payload
+	if oauthAccessToken == nil {
 		return nil, errors.InvalidParam("accessToken", "accessToken nil")
 	}
 
 	//remote get account id
 	meParams := &operations.MeParams{}
 	meParams.Context = ctx
-	meParams.AccessToken = accessToken.AccessToken
+	meParams.AccessToken = oauthAccessToken.AccessToken
 	meOk, apiError := s.oauthClient.Operations.Me(meParams)
 	if apiError != nil {
 		return nil, apiError
@@ -63,8 +63,8 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	//store oauth access token and account
 	dbOauthTokens := &user_db.OauthTokens{}
 	dbOauthTokens.AuthorizationCode = authorizationCode
-	dbOauthTokens.AccessToken = accessToken.AccessToken
-	dbOauthTokens.RefreshToken = accessToken.RefreshToken
+	dbOauthTokens.AccessToken = oauthAccessToken.AccessToken
+	dbOauthTokens.RefreshToken = oauthAccessToken.RefreshToken
 	dbOauthTokens.AccountId = accountId
 	_, err = s.userDB.OauthTokens.Insert(ctx, nil, dbOauthTokens)
 	if err != nil {
@@ -72,32 +72,32 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	}
 
 	//generate user token
-	expiresTime := time.Now().Add(time.Hour)
+	expiresTime := time.Now().Add(time.Second * models.UserAccessTokenExpireSeconds)
 	userToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   accountId,
 		ExpiresAt: expiresTime.Unix(),
 	})
-	tokenString, err := userToken.SignedString([]byte("0123456789"))
+	userAccessToken, err := userToken.SignedString([]byte("0123456789"))
 	if err != nil {
 		return nil, err
 	}
 	dbUserToken := &user_db.UserToken{}
 	dbUserToken.AccountId = accountId
 	dbUserToken.ExpiresTime = expiresTime
-	dbUserToken.UserToken = tokenString
+	dbUserToken.UserToken = userAccessToken
 	_, err = s.userDB.UserToken.Insert(ctx, nil, dbUserToken)
 	if err != nil {
 		return nil, err
 	}
 
 	//generate user refresh token
-	refreshToken := rand.NextHex(16)
+	userRefreshToken := rand.NextHex(16)
 	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().AccountId_Equal(accountId).QueryOne(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	if dbRefreshToken != nil {
-		dbRefreshToken.RefreshToken = refreshToken
+		dbRefreshToken.RefreshToken = userRefreshToken
 		err = s.userDB.RefreshToken.Update(ctx, nil, dbRefreshToken)
 		if err != nil {
 			return nil, err
@@ -112,13 +112,13 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 			if dbRefreshToken == nil {
 				dbRefreshToken = &user_db.RefreshToken{}
 				dbRefreshToken.AccountId = accountId
-				dbRefreshToken.RefreshToken = refreshToken
+				dbRefreshToken.RefreshToken = userRefreshToken
 				_, err = s.userDB.RefreshToken.Insert(ctx, tx, dbRefreshToken)
 				if err != nil {
 					return err
 				}
 			} else {
-				dbRefreshToken.RefreshToken = refreshToken
+				dbRefreshToken.RefreshToken = userRefreshToken
 				err = s.userDB.RefreshToken.Update(ctx, tx, dbRefreshToken)
 				if err != nil {
 					return err
@@ -140,8 +140,9 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	}
 
 	result = &models.OauthJumpResponse{}
-	result.TokenString = tokenString
-	result.RefreshToken = refreshToken
+	result.Token = &models.Token{}
+	result.Token.AccessToken = userAccessToken
+	result.Token.RefreshToken = userRefreshToken
 	result.QueryString = dbState.QueryString
 
 	return result, nil
