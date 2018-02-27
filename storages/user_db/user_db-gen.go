@@ -9,6 +9,7 @@ import (
 	"github.com/NeuronFramework/sql/wrap"
 	"github.com/go-sql-driver/mysql"
 	"go.uber.org/zap"
+	"os"
 	"strings"
 	"time"
 )
@@ -322,6 +323,7 @@ func (dao *OauthStateDao) init() (err error) {
 
 	return nil
 }
+
 func (dao *OauthStateDao) prepareInsertStmt() (err error) {
 	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO oauth_state (oauth_state,state_used,query_string) VALUES (?,?,?)")
 	return err
@@ -764,6 +766,7 @@ func (dao *OauthTokensDao) init() (err error) {
 
 	return nil
 }
+
 func (dao *OauthTokensDao) prepareInsertStmt() (err error) {
 	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO oauth_tokens (account_id,authorization_code,access_token,refresh_token) VALUES (?,?,?,?)")
 	return err
@@ -1166,6 +1169,7 @@ func (dao *RefreshTokenDao) init() (err error) {
 
 	return nil
 }
+
 func (dao *RefreshTokenDao) prepareInsertStmt() (err error) {
 	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO refresh_token (account_id,refresh_token) VALUES (?,?)")
 	return err
@@ -1583,6 +1587,7 @@ func (dao *UserTokenDao) init() (err error) {
 
 	return nil
 }
+
 func (dao *UserTokenDao) prepareInsertStmt() (err error) {
 	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO user_token (account_id,expires_time,user_token) VALUES (?,?,?)")
 	return err
@@ -1746,13 +1751,14 @@ type DB struct {
 	UserToken    *UserTokenDao
 }
 
-func NewDB(connectionString string) (d *DB, err error) {
-	if connectionString == "" {
-		return nil, fmt.Errorf("connectionString nil")
-	}
-
+func NewDB() (d *DB, err error) {
 	d = &DB{}
 
+	connectionString := os.Getenv("DB")
+	if connectionString == "" {
+		return nil, fmt.Errorf("DB env nil")
+	}
+	connectionString += "/user?parseTime=true"
 	db, err := wrap.Open("mysql", connectionString)
 	if err != nil {
 		return nil, err

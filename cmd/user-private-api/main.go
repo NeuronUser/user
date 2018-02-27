@@ -7,13 +7,9 @@ import (
 	"github.com/NeuronUser/user/cmd/user-private-api/handler"
 	"github.com/go-openapi/loads"
 	"net/http"
-	"os"
 )
 
 func main() {
-	os.Setenv("DEBUG", "true")
-	os.Setenv("PORT", "8086")
-
 	restful.Run(func() (http.Handler, error) {
 		h, err := handler.NewUserHandler()
 		if err != nil {
