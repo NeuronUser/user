@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"github.com/NeuronFramework/rand"
-	"github.com/NeuronFramework/restful/pointers"
+	"github.com/NeuronFramework/restful"
 	"github.com/NeuronFramework/sql/wrap"
 	"github.com/NeuronFramework2/errors"
 	"github.com/NeuronUser/user/models"
@@ -31,9 +31,9 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	tokenParams := &operations.TokenParams{}
 	tokenParams.Context = ctx
 	tokenParams.GrantType = "authorization_code"
-	tokenParams.ClientID = pointers.String("100001")
-	tokenParams.RedirectURI = pointers.String(redirectUri)
-	tokenParams.Code = pointers.String(authorizationCode)
+	tokenParams.ClientID = restful.String("100001")
+	tokenParams.RedirectURI = restful.String(redirectUri)
+	tokenParams.Code = restful.String(authorizationCode)
 	tokenOk, apiErr := s.oauthClient.Operations.Token(tokenParams, runtime.ClientAuthInfoWriterFunc(
 		func(req runtime.ClientRequest, reg strfmt.Registry) error {
 			return req.SetHeaderParam("Authorization",
