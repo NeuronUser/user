@@ -140,6 +140,7 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	}
 
 	result = &models.OauthJumpResponse{}
+	result.UserID = dbUserToken.AccountId
 	result.Token = &models.Token{}
 	result.Token.AccessToken = userAccessToken
 	result.Token.RefreshToken = userRefreshToken

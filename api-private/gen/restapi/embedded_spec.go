@@ -9,8 +9,12 @@ import (
 	"encoding/json"
 )
 
-// SwaggerJSON embedded version of the swagger document used at generation time
-var SwaggerJSON, FlatSwaggerJSON json.RawMessage
+var (
+	// SwaggerJSON embedded version of the swagger document used at generation time
+	SwaggerJSON json.RawMessage
+	// FlatSwaggerJSON embedded flattened version of the swagger document used at generation time
+	FlatSwaggerJSON json.RawMessage
+)
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
@@ -137,6 +141,10 @@ func init() {
   "definitions": {
     "oauthJumpResponse": {
       "type": "object",
+      "required": [
+        "userID",
+        "token"
+      ],
       "properties": {
         "queryString": {
           "type": "string"
@@ -144,11 +152,18 @@ func init() {
         "token": {
           "type": "object",
           "$ref": "#/definitions/token"
+        },
+        "userID": {
+          "type": "string"
         }
       }
     },
     "token": {
       "type": "object",
+      "required": [
+        "accessToken",
+        "refreshToken"
+      ],
       "properties": {
         "accessToken": {
           "type": "string"
@@ -294,6 +309,10 @@ func init() {
   "definitions": {
     "oauthJumpResponse": {
       "type": "object",
+      "required": [
+        "userID",
+        "token"
+      ],
       "properties": {
         "queryString": {
           "type": "string"
@@ -301,11 +320,18 @@ func init() {
         "token": {
           "type": "object",
           "$ref": "#/definitions/token"
+        },
+        "userID": {
+          "type": "string"
         }
       }
     },
     "token": {
       "type": "object",
+      "required": [
+        "accessToken",
+        "refreshToken"
+      ],
       "properties": {
         "accessToken": {
           "type": "string"

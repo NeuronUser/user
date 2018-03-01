@@ -140,6 +140,9 @@
     "oauthJumpResponse": {
       "type": "object",
       "properties": {
+        "userID": {
+          "type": "string"
+        },
         "token": {
           "type": "object",
           "$ref": "#/definitions/token"
@@ -147,7 +150,11 @@
         "queryString": {
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "userID",
+        "token"
+      ]
     },
     "token": {
       "type": "object",
@@ -158,7 +165,11 @@
         "refreshToken": {
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "accessToken",
+        "refreshToken"
+      ]
     }
   }
 }

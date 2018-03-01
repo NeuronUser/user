@@ -27,6 +27,8 @@ func NewUserPrivateAPI(spec *loads.Document) *UserPrivateAPI {
 		formats:             strfmt.Default,
 		defaultConsumes:     "application/json",
 		defaultProduces:     "application/json",
+		customConsumers:     make(map[string]runtime.Consumer),
+		customProducers:     make(map[string]runtime.Producer),
 		ServerShutdown:      func() {},
 		spec:                spec,
 		ServeError:          restful.ServeError,
@@ -36,16 +38,16 @@ func NewUserPrivateAPI(spec *loads.Document) *UserPrivateAPI {
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
 		LogoutHandler: LogoutHandlerFunc(func(params LogoutParams) middleware.Responder {
-			panic("operation Logout has not yet been implemented")
+			return middleware.NotImplemented("operation Logout has not yet been implemented")
 		}),
 		OauthJumpHandler: OauthJumpHandlerFunc(func(params OauthJumpParams) middleware.Responder {
-			panic("operation OauthJump has not yet been implemented")
+			return middleware.NotImplemented("operation OauthJump has not yet been implemented")
 		}),
 		OauthStateHandler: OauthStateHandlerFunc(func(params OauthStateParams) middleware.Responder {
-			panic("operation OauthState has not yet been implemented")
+			return middleware.NotImplemented("operation OauthState has not yet been implemented")
 		}),
 		RefreshTokenHandler: RefreshTokenHandlerFunc(func(params RefreshTokenParams) middleware.Responder {
-			panic("operation RefreshToken has not yet been implemented")
+			return middleware.NotImplemented("operation RefreshToken has not yet been implemented")
 		}),
 	}
 }
@@ -56,6 +58,8 @@ type UserPrivateAPI struct {
 	context         *middleware.Context
 	handlers        map[string]map[string]http.Handler
 	formats         strfmt.Registry
+	customConsumers map[string]runtime.Consumer
+	customProducers map[string]runtime.Producer
 	defaultConsumes string
 	defaultProduces string
 	Middleware      func(middleware.Builder) http.Handler
@@ -200,6 +204,10 @@ func (o *UserPrivateAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Co
 			result["application/json"] = o.JSONConsumer
 
 		}
+
+		if c, ok := o.customConsumers[mt]; ok {
+			result[mt] = c
+		}
 	}
 	return result
 
@@ -215,6 +223,10 @@ func (o *UserPrivateAPI) ProducersFor(mediaTypes []string) map[string]runtime.Pr
 		case "application/json":
 			result["application/json"] = o.JSONProducer
 
+		}
+
+		if p, ok := o.customProducers[mt]; ok {
+			result[mt] = p
 		}
 	}
 	return result
@@ -291,4 +303,14 @@ func (o *UserPrivateAPI) Init() {
 	if len(o.handlers) == 0 {
 		o.initHandlerCache()
 	}
+}
+
+// RegisterConsumer allows you to add (or override) a consumer for a media type.
+func (o *UserPrivateAPI) RegisterConsumer(mediaType string, consumer runtime.Consumer) {
+	o.customConsumers[mediaType] = consumer
+}
+
+// RegisterProducer allows you to add (or override) a producer for a media type.
+func (o *UserPrivateAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
+	o.customProducers[mediaType] = producer
 }

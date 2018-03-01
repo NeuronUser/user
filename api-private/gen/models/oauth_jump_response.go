@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // OauthJumpResponse oauth jump response
@@ -20,7 +21,12 @@ type OauthJumpResponse struct {
 	QueryString string `json:"queryString,omitempty"`
 
 	// token
-	Token *Token `json:"token,omitempty"`
+	// Required: true
+	Token *Token `json:"token"`
+
+	// user ID
+	// Required: true
+	UserID *string `json:"userID"`
 }
 
 // Validate validates this oauth jump response
@@ -28,6 +34,11 @@ func (m *OauthJumpResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateToken(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateUserID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -40,8 +51,8 @@ func (m *OauthJumpResponse) Validate(formats strfmt.Registry) error {
 
 func (m *OauthJumpResponse) validateToken(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Token) { // not required
-		return nil
+	if err := validate.Required("token", "body", m.Token); err != nil {
+		return err
 	}
 
 	if m.Token != nil {
@@ -52,6 +63,16 @@ func (m *OauthJumpResponse) validateToken(formats strfmt.Registry) error {
 			}
 			return err
 		}
+
+	}
+
+	return nil
+}
+
+func (m *OauthJumpResponse) validateUserID(formats strfmt.Registry) error {
+
+	if err := validate.Required("userID", "body", m.UserID); err != nil {
+		return err
 	}
 
 	return nil

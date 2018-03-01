@@ -11,8 +11,8 @@ func fromToken(p *models.Token) (r *api.Token) {
 	}
 
 	r = &api.Token{}
-	r.AccessToken = p.AccessToken
-	r.RefreshToken = p.RefreshToken
+	r.AccessToken = &p.AccessToken
+	r.RefreshToken = &p.RefreshToken
 
 	return r
 }
@@ -23,6 +23,7 @@ func fromOauthJumpResponse(p *models.OauthJumpResponse) (r *api.OauthJumpRespons
 	}
 
 	r = &api.OauthJumpResponse{}
+	r.UserID = &p.UserID
 	r.Token = fromToken(p.Token)
 	r.QueryString = p.QueryString
 

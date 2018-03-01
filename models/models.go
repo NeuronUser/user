@@ -6,6 +6,7 @@ type Token struct {
 }
 
 type OauthJumpResponse struct {
+	UserID      string
 	Token       *Token
 	QueryString string
 }

@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/NeuronUser/user/api-private/gen/models"
+	models "github.com/NeuronUser/user/api-private/gen/models"
 )
 
 // RefreshTokenOKCode is the HTTP code returned for type RefreshTokenOK
@@ -30,6 +30,7 @@ type RefreshTokenOK struct {
 
 // NewRefreshTokenOK creates RefreshTokenOK with default headers values
 func NewRefreshTokenOK() *RefreshTokenOK {
+
 	return &RefreshTokenOK{}
 }
 

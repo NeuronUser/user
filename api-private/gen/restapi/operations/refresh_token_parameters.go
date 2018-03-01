@@ -17,9 +17,9 @@ import (
 )
 
 // NewRefreshTokenParams creates a new RefreshTokenParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewRefreshTokenParams() RefreshTokenParams {
-	var ()
+
 	return RefreshTokenParams{}
 }
 
@@ -40,9 +40,12 @@ type RefreshTokenParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewRefreshTokenParams() beforehand.
 func (o *RefreshTokenParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -66,6 +69,9 @@ func (o *RefreshTokenParams) bindRefreshToken(rawData []string, hasKey bool, for
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// AllowEmptyValue: false
 	if err := validate.RequiredString("refreshToken", "query", raw); err != nil {
 		return err
 	}

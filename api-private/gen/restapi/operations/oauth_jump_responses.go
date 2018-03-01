@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/NeuronUser/user/api-private/gen/models"
+	models "github.com/NeuronUser/user/api-private/gen/models"
 )
 
 // OauthJumpOKCode is the HTTP code returned for type OauthJumpOK
@@ -30,6 +30,7 @@ type OauthJumpOK struct {
 
 // NewOauthJumpOK creates OauthJumpOK with default headers values
 func NewOauthJumpOK() *OauthJumpOK {
+
 	return &OauthJumpOK{}
 }
 

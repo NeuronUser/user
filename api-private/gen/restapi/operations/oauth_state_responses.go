@@ -28,6 +28,7 @@ type OauthStateOK struct {
 
 // NewOauthStateOK creates OauthStateOK with default headers values
 func NewOauthStateOK() *OauthStateOK {
+
 	return &OauthStateOK{}
 }
 
