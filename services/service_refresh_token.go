@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/NeuronFramework/errors"
 	"github.com/NeuronUser/user/models"
 	"github.com/NeuronUser/user/storages/user_db"
 	"github.com/dgrijalva/jwt-go"
@@ -14,6 +15,10 @@ func (s *UserService) RefreshToken(ctx context.Context, refreshToken string) (to
 		QueryOne(ctx, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if dbRefreshToken == nil {
+		return nil, errors.NotFound("refreshToken not exists")
 	}
 
 	expiresTime := time.Now().Add(time.Second * models.UserAccessTokenExpireSeconds)
