@@ -6,15 +6,14 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
+	"fmt"
 	"io"
 
-	"github.com/NeuronFramework/errors"
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/NeuronUser/user/remotes/oauth/gen/models"
+	models "github.com/NeuronUser/user/remotes/oauth/gen/models"
 )
 
 // TokenReader is a Reader for the Token structure.
@@ -34,13 +33,7 @@ func (o *TokenReader) ReadResponse(response runtime.ClientResponse, consumer run
 		return result, nil
 
 	default:
-		dec := json.NewDecoder(response.Body())
-		standardError := errors.Error{}
-		err := dec.Decode(&standardError)
-		if err != nil {
-			return nil, err
-		}
-		return nil, &standardError
+		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -58,8 +51,7 @@ type TokenOK struct {
 }
 
 func (o *TokenOK) Error() string {
-	s, _ := json.Marshal(o.Payload)
-	return string(s)
+	return fmt.Sprintf("[POST /token][%d] tokenOK  %+v", 200, o.Payload)
 }
 
 func (o *TokenOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

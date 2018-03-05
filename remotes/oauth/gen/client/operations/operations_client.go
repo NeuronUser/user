@@ -6,7 +6,6 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"github.com/NeuronFramework/errors"
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -28,7 +27,7 @@ type Client struct {
 /*
 Me me API
 */
-func (a *Client) Me(params *MeParams) (*MeOK, *errors.Error) {
+func (a *Client) Me(params *MeParams) (*MeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewMeParams()
@@ -47,7 +46,7 @@ func (a *Client) Me(params *MeParams) (*MeOK, *errors.Error) {
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err)
+		return nil, err
 	}
 	return result.(*MeOK), nil
 
@@ -56,7 +55,7 @@ func (a *Client) Me(params *MeParams) (*MeOK, *errors.Error) {
 /*
 Token token API
 */
-func (a *Client) Token(params *TokenParams, authInfo runtime.ClientAuthInfoWriter) (*TokenOK, *errors.Error) {
+func (a *Client) Token(params *TokenParams, authInfo runtime.ClientAuthInfoWriter) (*TokenOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewTokenParams()
@@ -76,7 +75,7 @@ func (a *Client) Token(params *TokenParams, authInfo runtime.ClientAuthInfoWrite
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err)
+		return nil, err
 	}
 	return result.(*TokenOK), nil
 

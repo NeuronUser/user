@@ -38,9 +38,6 @@ func NewHTTPClient(formats strfmt.Registry) *Oauth {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Oauth {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -52,6 +49,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Oau
 
 // New creates a new oauth client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *Oauth {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(Oauth)
 	cli.Transport = transport
 

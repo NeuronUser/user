@@ -6,10 +6,9 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
+	"fmt"
 	"io"
 
-	"github.com/NeuronFramework/errors"
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -32,13 +31,7 @@ func (o *MeReader) ReadResponse(response runtime.ClientResponse, consumer runtim
 		return result, nil
 
 	default:
-		dec := json.NewDecoder(response.Body())
-		standardError := errors.Error{}
-		err := dec.Decode(&standardError)
-		if err != nil {
-			return nil, err
-		}
-		return nil, &standardError
+		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -56,8 +49,7 @@ type MeOK struct {
 }
 
 func (o *MeOK) Error() string {
-	s, _ := json.Marshal(o.Payload)
-	return string(s)
+	return fmt.Sprintf("[GET /me][%d] meOK  %+v", 200, o.Payload)
 }
 
 func (o *MeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
