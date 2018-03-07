@@ -23,9 +23,9 @@ func NewUserService() (s *UserService, err error) {
 		return nil, err
 	}
 
-	oauthUrl := os.Getenv("OAUTH_URL")
+	oauthUrl := os.Getenv("API_GATEWAY")
 	if oauthUrl == "" {
-		return nil, errors.Unknown("env OAUTH_URL nil")
+		return nil, errors.Unknown("env API_GATEWAY nil")
 	}
 	s.oauthClient = client.NewHTTPClientWithConfig(nil,
 		client.DefaultTransportConfig().WithHost(oauthUrl))
