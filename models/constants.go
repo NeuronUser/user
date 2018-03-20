@@ -1,3 +1,3 @@
 package models
 
-const UserAccessTokenExpireSeconds = 5
+const UserAccessTokenExpireSeconds = 5 * 60
