@@ -18,7 +18,7 @@ func (s *UserService) RefreshToken(ctx context.Context, refreshToken string) (to
 	}
 
 	if dbRefreshToken == nil {
-		return nil, errors.NotFound("refreshToken not exists")
+		return nil, errors.NotFound("refreshToken不存在")
 	}
 
 	expiresTime := time.Now().Add(time.Second * models.UserAccessTokenExpireSeconds)

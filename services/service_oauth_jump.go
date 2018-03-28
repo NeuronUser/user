@@ -44,7 +44,7 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	}
 	oauthAccessToken := tokenOk.Payload
 	if oauthAccessToken == nil {
-		return nil, errors.InvalidParam("accessToken", "accessToken nil")
+		return nil, errors.InvalidParam("accessToken", "获取accessToken失败")
 	}
 
 	//remote get account id
@@ -57,7 +57,7 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	}
 	accountId := meOk.Payload
 	if accountId == "" {
-		return nil, errors.InvalidParam("accountId", "accountId nil")
+		return nil, errors.InvalidParam("accountId", "获取accountId失败")
 	}
 
 	//store oauth access token and account
