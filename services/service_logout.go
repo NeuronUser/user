@@ -1,10 +1,11 @@
 package services
 
 import (
-	"context"
+	"github.com/NeuronFramework/restful"
+	"time"
 )
 
-func (s *UserService) Logout(ctx context.Context, token string, refreshToken string) (err error) {
+func (s *UserService) Logout(ctx *restful.Context, token string, refreshToken string) (err error) {
 	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().
 		RefreshToken_Equal(refreshToken).
 		QueryOne(ctx, nil)
@@ -12,7 +13,9 @@ func (s *UserService) Logout(ctx context.Context, token string, refreshToken str
 		return nil
 	}
 
-	err = s.userDB.RefreshToken.Delete(ctx, nil, dbRefreshToken.Id)
+	dbRefreshToken.IsLogout = 1
+	dbRefreshToken.GmtLogout = time.Now().UTC()
+	err = s.userDB.RefreshToken.Update(ctx, nil, dbRefreshToken)
 	if err != nil {
 		return err
 	}

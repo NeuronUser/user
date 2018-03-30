@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"context"
 	"github.com/NeuronFramework/errors"
 	"github.com/NeuronFramework/log"
+	"github.com/NeuronFramework/restful"
 	"github.com/NeuronUser/user/api-private/gen/restapi/operations"
 	"github.com/NeuronUser/user/services"
 	"github.com/go-openapi/runtime/middleware"
@@ -27,7 +27,7 @@ func NewUserHandler() (h *UserHandler, err error) {
 }
 
 func (h *UserHandler) OauthState(p operations.OauthStateParams) middleware.Responder {
-	state, err := h.service.OauthState(context.Background(), p.QueryString)
+	state, err := h.service.OauthState(restful.NewContext(p.HTTPRequest), p.QueryString)
 	if err != nil {
 		return errors.Wrap(err)
 	}
@@ -36,7 +36,7 @@ func (h *UserHandler) OauthState(p operations.OauthStateParams) middleware.Respo
 }
 
 func (h *UserHandler) OauthJump(p operations.OauthJumpParams) middleware.Responder {
-	result, err := h.service.OauthJump(context.Background(), p.RedirectURI, p.AuthorizationCode, p.State)
+	result, err := h.service.OauthJump(restful.NewContext(p.HTTPRequest), p.RedirectURI, p.AuthorizationCode, p.State)
 	if err != nil {
 		return errors.Wrap(err)
 	}
@@ -45,7 +45,7 @@ func (h *UserHandler) OauthJump(p operations.OauthJumpParams) middleware.Respond
 }
 
 func (h *UserHandler) RefreshToken(p operations.RefreshTokenParams) middleware.Responder {
-	token, err := h.service.RefreshToken(context.Background(), p.RefreshToken)
+	token, err := h.service.RefreshToken(restful.NewContext(p.HTTPRequest), p.RefreshToken)
 	if err != nil {
 		return errors.Wrap(err)
 	}
@@ -56,7 +56,7 @@ func (h *UserHandler) RefreshToken(p operations.RefreshTokenParams) middleware.R
 func (h *UserHandler) Logout(p operations.LogoutParams) middleware.Responder {
 	p.HTTPRequest.Context()
 
-	err := h.service.Logout(context.Background(), p.Token, p.RefreshToken)
+	err := h.service.Logout(restful.NewContext(p.HTTPRequest), p.Token, p.RefreshToken)
 	if err != nil {
 		return errors.Wrap(err)
 	}

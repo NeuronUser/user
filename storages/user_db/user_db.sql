@@ -16,47 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `oauth_state`
---
-
-DROP TABLE IF EXISTS `oauth_state`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `oauth_state` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `oauth_state` varchar(128) NOT NULL,
-  `state_used` tinyint(1) NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `query_string` varchar(256) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_state` (`oauth_state`),
-  KEY `idx_update` (`update_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `oauth_tokens`
---
-
-DROP TABLE IF EXISTS `oauth_tokens`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `oauth_tokens` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `account_id` varchar(128) NOT NULL,
-  `authorization_code` varchar(128) NOT NULL,
-  `access_token` varchar(1024) NOT NULL,
-  `refresh_token` varchar(128) NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_update_time` (`update_time`),
-  KEY `idx_account` (`account_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `refresh_token`
 --
 
@@ -65,15 +24,23 @@ DROP TABLE IF EXISTS `refresh_token`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `refresh_token` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `oauth_state` varchar(128) NOT NULL,
+  `query_string` varchar(256) NOT NULL,
+  `user_agent` varchar(256) NOT NULL,
   `account_id` varchar(128) NOT NULL,
   `refresh_token` varchar(128) NOT NULL,
+  `is_logout` tinyint(1) NOT NULL,
+  `gmt_logout` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `oauth_authorization_code` varchar(128) NOT NULL,
+  `oauth_refresh_token` varchar(128) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_account` (`account_id`),
+  UNIQUE KEY `idx_oauth_state` (`oauth_state`),
   UNIQUE KEY `idx_refresh_token` (`refresh_token`),
-  KEY `idx_update_time` (`update_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `idx_update_time` (`update_time`),
+  KEY `idx_account` (`account_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,7 +60,7 @@ CREATE TABLE `user_token` (
   PRIMARY KEY (`id`),
   KEY `idx_update_time` (`update_time`),
   KEY `idx_account` (`account_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2891 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -105,4 +72,4 @@ CREATE TABLE `user_token` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-14 21:10:21
+-- Dump completed on 2018-03-30  9:42:23

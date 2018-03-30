@@ -59,895 +59,53 @@ func (q *BaseQuery) buildQueryString() string {
 	return buf.String()
 }
 
-const OAUTH_STATE_TABLE_NAME = "oauth_state"
-
-type OAUTH_STATE_FIELD string
-
-const OAUTH_STATE_FIELD_ID = OAUTH_STATE_FIELD("id")
-const OAUTH_STATE_FIELD_OAUTH_STATE = OAUTH_STATE_FIELD("oauth_state")
-const OAUTH_STATE_FIELD_STATE_USED = OAUTH_STATE_FIELD("state_used")
-const OAUTH_STATE_FIELD_CREATE_TIME = OAUTH_STATE_FIELD("create_time")
-const OAUTH_STATE_FIELD_UPDATE_TIME = OAUTH_STATE_FIELD("update_time")
-const OAUTH_STATE_FIELD_QUERY_STRING = OAUTH_STATE_FIELD("query_string")
-
-const OAUTH_STATE_ALL_FIELDS_STRING = "id,oauth_state,state_used,create_time,update_time,query_string"
-
-var OAUTH_STATE_ALL_FIELDS = []string{
-	"id",
-	"oauth_state",
-	"state_used",
-	"create_time",
-	"update_time",
-	"query_string",
-}
-
-type OauthState struct {
-	Id          uint64 //size=20
-	OauthState  string //size=128
-	StateUsed   int32  //size=1
-	CreateTime  time.Time
-	UpdateTime  time.Time
-	QueryString string //size=256
-}
-
-type OauthStateQuery struct {
-	BaseQuery
-	dao *OauthStateDao
-}
-
-func NewOauthStateQuery(dao *OauthStateDao) *OauthStateQuery {
-	q := &OauthStateQuery{}
-	q.dao = dao
-
-	return q
-}
-
-func (q *OauthStateQuery) QueryOne(ctx context.Context, tx *wrap.Tx) (*OauthState, error) {
-	return q.dao.QueryOne(ctx, tx, q.buildQueryString())
-}
-
-func (q *OauthStateQuery) QueryList(ctx context.Context, tx *wrap.Tx) (list []*OauthState, err error) {
-	return q.dao.QueryList(ctx, tx, q.buildQueryString())
-}
-
-func (q *OauthStateQuery) QueryCount(ctx context.Context, tx *wrap.Tx) (count int64, err error) {
-	return q.dao.QueryCount(ctx, tx, q.buildQueryString())
-}
-
-func (q *OauthStateQuery) QueryGroupBy(ctx context.Context, tx *wrap.Tx) (rows *wrap.Rows, err error) {
-	return q.dao.QueryGroupBy(ctx, tx, q.groupByFields, q.buildQueryString())
-}
-
-func (q *OauthStateQuery) ForUpdate() *OauthStateQuery {
-	q.forUpdate = true
-	return q
-}
-
-func (q *OauthStateQuery) ForShare() *OauthStateQuery {
-	q.forShare = true
-	return q
-}
-
-func (q *OauthStateQuery) GroupBy(fields ...OAUTH_STATE_FIELD) *OauthStateQuery {
-	q.groupByFields = make([]string, len(fields))
-	for i, v := range fields {
-		q.groupByFields[i] = string(v)
-	}
-	return q
-}
-
-func (q *OauthStateQuery) Limit(startIncluded int64, count int64) *OauthStateQuery {
-	q.limit = fmt.Sprintf(" limit %d,%d", startIncluded, count)
-	return q
-}
-
-func (q *OauthStateQuery) OrderBy(fieldName OAUTH_STATE_FIELD, asc bool) *OauthStateQuery {
-	if q.order != "" {
-		q.order += ","
-	}
-	q.order += string(fieldName) + " "
-	if asc {
-		q.order += "asc"
-	} else {
-		q.order += "desc"
-	}
-
-	return q
-}
-
-func (q *OauthStateQuery) OrderByGroupCount(asc bool) *OauthStateQuery {
-	if q.order != "" {
-		q.order += ","
-	}
-	q.order += "count(1) "
-	if asc {
-		q.order += "asc"
-	} else {
-		q.order += "desc"
-	}
-
-	return q
-}
-
-func (q *OauthStateQuery) w(format string, a ...interface{}) *OauthStateQuery {
-	q.where += fmt.Sprintf(format, a...)
-	return q
-}
-
-func (q *OauthStateQuery) Left() *OauthStateQuery  { return q.w(" ( ") }
-func (q *OauthStateQuery) Right() *OauthStateQuery { return q.w(" ) ") }
-func (q *OauthStateQuery) And() *OauthStateQuery   { return q.w(" AND ") }
-func (q *OauthStateQuery) Or() *OauthStateQuery    { return q.w(" OR ") }
-func (q *OauthStateQuery) Not() *OauthStateQuery   { return q.w(" NOT ") }
-
-func (q *OauthStateQuery) Id_Equal(v uint64) *OauthStateQuery { return q.w("id='" + fmt.Sprint(v) + "'") }
-func (q *OauthStateQuery) Id_NotEqual(v uint64) *OauthStateQuery {
-	return q.w("id<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) Id_Less(v uint64) *OauthStateQuery { return q.w("id<'" + fmt.Sprint(v) + "'") }
-func (q *OauthStateQuery) Id_LessEqual(v uint64) *OauthStateQuery {
-	return q.w("id<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) Id_Greater(v uint64) *OauthStateQuery {
-	return q.w("id>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) Id_GreaterEqual(v uint64) *OauthStateQuery {
-	return q.w("id>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) OauthState_Equal(v string) *OauthStateQuery {
-	return q.w("oauth_state='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) OauthState_NotEqual(v string) *OauthStateQuery {
-	return q.w("oauth_state<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) OauthState_Less(v string) *OauthStateQuery {
-	return q.w("oauth_state<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) OauthState_LessEqual(v string) *OauthStateQuery {
-	return q.w("oauth_state<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) OauthState_Greater(v string) *OauthStateQuery {
-	return q.w("oauth_state>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) OauthState_GreaterEqual(v string) *OauthStateQuery {
-	return q.w("oauth_state>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) StateUsed_Equal(v int32) *OauthStateQuery {
-	return q.w("state_used='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) StateUsed_NotEqual(v int32) *OauthStateQuery {
-	return q.w("state_used<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) StateUsed_Less(v int32) *OauthStateQuery {
-	return q.w("state_used<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) StateUsed_LessEqual(v int32) *OauthStateQuery {
-	return q.w("state_used<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) StateUsed_Greater(v int32) *OauthStateQuery {
-	return q.w("state_used>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) StateUsed_GreaterEqual(v int32) *OauthStateQuery {
-	return q.w("state_used>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) CreateTime_Equal(v time.Time) *OauthStateQuery {
-	return q.w("create_time='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) CreateTime_NotEqual(v time.Time) *OauthStateQuery {
-	return q.w("create_time<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) CreateTime_Less(v time.Time) *OauthStateQuery {
-	return q.w("create_time<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) CreateTime_LessEqual(v time.Time) *OauthStateQuery {
-	return q.w("create_time<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) CreateTime_Greater(v time.Time) *OauthStateQuery {
-	return q.w("create_time>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) CreateTime_GreaterEqual(v time.Time) *OauthStateQuery {
-	return q.w("create_time>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) UpdateTime_Equal(v time.Time) *OauthStateQuery {
-	return q.w("update_time='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) UpdateTime_NotEqual(v time.Time) *OauthStateQuery {
-	return q.w("update_time<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) UpdateTime_Less(v time.Time) *OauthStateQuery {
-	return q.w("update_time<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) UpdateTime_LessEqual(v time.Time) *OauthStateQuery {
-	return q.w("update_time<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) UpdateTime_Greater(v time.Time) *OauthStateQuery {
-	return q.w("update_time>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) UpdateTime_GreaterEqual(v time.Time) *OauthStateQuery {
-	return q.w("update_time>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) QueryString_Equal(v string) *OauthStateQuery {
-	return q.w("query_string='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) QueryString_NotEqual(v string) *OauthStateQuery {
-	return q.w("query_string<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) QueryString_Less(v string) *OauthStateQuery {
-	return q.w("query_string<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) QueryString_LessEqual(v string) *OauthStateQuery {
-	return q.w("query_string<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) QueryString_Greater(v string) *OauthStateQuery {
-	return q.w("query_string>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthStateQuery) QueryString_GreaterEqual(v string) *OauthStateQuery {
-	return q.w("query_string>='" + fmt.Sprint(v) + "'")
-}
-
-type OauthStateDao struct {
-	logger     *zap.Logger
-	db         *DB
-	insertStmt *wrap.Stmt
-	updateStmt *wrap.Stmt
-	deleteStmt *wrap.Stmt
-}
-
-func NewOauthStateDao(db *DB) (t *OauthStateDao, err error) {
-	t = &OauthStateDao{}
-	t.logger = log.TypedLogger(t)
-	t.db = db
-	err = t.init()
-	if err != nil {
-		return nil, err
-	}
-
-	return t, nil
-}
-
-func (dao *OauthStateDao) init() (err error) {
-	err = dao.prepareInsertStmt()
-	if err != nil {
-		return err
-	}
-
-	err = dao.prepareUpdateStmt()
-	if err != nil {
-		return err
-	}
-
-	err = dao.prepareDeleteStmt()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (dao *OauthStateDao) prepareInsertStmt() (err error) {
-	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO oauth_state (oauth_state,state_used,query_string) VALUES (?,?,?)")
-	return err
-}
-
-func (dao *OauthStateDao) prepareUpdateStmt() (err error) {
-	dao.updateStmt, err = dao.db.Prepare(context.Background(), "UPDATE oauth_state SET oauth_state=?,state_used=?,query_string=? WHERE id=?")
-	return err
-}
-
-func (dao *OauthStateDao) prepareDeleteStmt() (err error) {
-	dao.deleteStmt, err = dao.db.Prepare(context.Background(), "DELETE FROM oauth_state WHERE id=?")
-	return err
-}
-
-func (dao *OauthStateDao) Insert(ctx context.Context, tx *wrap.Tx, e *OauthState) (id int64, err error) {
-	stmt := dao.insertStmt
-	if tx != nil {
-		stmt = tx.Stmt(ctx, stmt)
-	}
-
-	result, err := stmt.Exec(ctx, e.OauthState, e.StateUsed, e.QueryString)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err = result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
-}
-
-func (dao *OauthStateDao) Update(ctx context.Context, tx *wrap.Tx, e *OauthState) (err error) {
-	stmt := dao.updateStmt
-	if tx != nil {
-		stmt = tx.Stmt(ctx, stmt)
-	}
-
-	_, err = stmt.Exec(ctx, e.OauthState, e.StateUsed, e.QueryString, e.Id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (dao *OauthStateDao) Delete(ctx context.Context, tx *wrap.Tx, id uint64) (err error) {
-	stmt := dao.deleteStmt
-	if tx != nil {
-		stmt = tx.Stmt(ctx, stmt)
-	}
-
-	_, err = stmt.Exec(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (dao *OauthStateDao) scanRow(row *wrap.Row) (*OauthState, error) {
-	e := &OauthState{}
-	err := row.Scan(&e.Id, &e.OauthState, &e.StateUsed, &e.CreateTime, &e.UpdateTime, &e.QueryString)
-	if err != nil {
-		if err == wrap.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
-	}
-
-	return e, nil
-}
-
-func (dao *OauthStateDao) scanRows(rows *wrap.Rows) (list []*OauthState, err error) {
-	list = make([]*OauthState, 0)
-	for rows.Next() {
-		e := OauthState{}
-		err = rows.Scan(&e.Id, &e.OauthState, &e.StateUsed, &e.CreateTime, &e.UpdateTime, &e.QueryString)
-		if err != nil {
-			return nil, err
-		}
-		list = append(list, &e)
-	}
-	if rows.Err() != nil {
-		err = rows.Err()
-		return nil, err
-	}
-
-	return list, nil
-}
-
-func (dao *OauthStateDao) QueryOne(ctx context.Context, tx *wrap.Tx, query string) (*OauthState, error) {
-	querySql := "SELECT " + OAUTH_STATE_ALL_FIELDS_STRING + " FROM oauth_state " + query
-	var row *wrap.Row
-	if tx == nil {
-		row = dao.db.QueryRow(ctx, querySql)
-	} else {
-		row = tx.QueryRow(ctx, querySql)
-	}
-	return dao.scanRow(row)
-}
-
-func (dao *OauthStateDao) QueryList(ctx context.Context, tx *wrap.Tx, query string) (list []*OauthState, err error) {
-	querySql := "SELECT " + OAUTH_STATE_ALL_FIELDS_STRING + " FROM oauth_state " + query
-	var rows *wrap.Rows
-	if tx == nil {
-		rows, err = dao.db.Query(ctx, querySql)
-	} else {
-		rows, err = tx.Query(ctx, querySql)
-	}
-	if err != nil {
-		dao.logger.Error("sqlDriver", zap.Error(err))
-		return nil, err
-	}
-
-	return dao.scanRows(rows)
-}
-
-func (dao *OauthStateDao) QueryCount(ctx context.Context, tx *wrap.Tx, query string) (count int64, err error) {
-	querySql := "SELECT COUNT(1) FROM oauth_state " + query
-	var row *wrap.Row
-	if tx == nil {
-		row = dao.db.QueryRow(ctx, querySql)
-	} else {
-		row = tx.QueryRow(ctx, querySql)
-	}
-	if err != nil {
-		dao.logger.Error("sqlDriver", zap.Error(err))
-		return 0, err
-	}
-
-	err = row.Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
-}
-
-func (dao *OauthStateDao) QueryGroupBy(ctx context.Context, tx *wrap.Tx, groupByFields []string, query string) (rows *wrap.Rows, err error) {
-	querySql := "SELECT " + strings.Join(groupByFields, ",") + ",count(1) FROM oauth_state " + query
-	if tx == nil {
-		return dao.db.Query(ctx, querySql)
-	} else {
-		return tx.Query(ctx, querySql)
-	}
-}
-
-func (dao *OauthStateDao) GetQuery() *OauthStateQuery {
-	return NewOauthStateQuery(dao)
-}
-
-const OAUTH_TOKENS_TABLE_NAME = "oauth_tokens"
-
-type OAUTH_TOKENS_FIELD string
-
-const OAUTH_TOKENS_FIELD_ID = OAUTH_TOKENS_FIELD("id")
-const OAUTH_TOKENS_FIELD_ACCOUNT_ID = OAUTH_TOKENS_FIELD("account_id")
-const OAUTH_TOKENS_FIELD_AUTHORIZATION_CODE = OAUTH_TOKENS_FIELD("authorization_code")
-const OAUTH_TOKENS_FIELD_ACCESS_TOKEN = OAUTH_TOKENS_FIELD("access_token")
-const OAUTH_TOKENS_FIELD_REFRESH_TOKEN = OAUTH_TOKENS_FIELD("refresh_token")
-const OAUTH_TOKENS_FIELD_CREATE_TIME = OAUTH_TOKENS_FIELD("create_time")
-const OAUTH_TOKENS_FIELD_UPDATE_TIME = OAUTH_TOKENS_FIELD("update_time")
-
-const OAUTH_TOKENS_ALL_FIELDS_STRING = "id,account_id,authorization_code,access_token,refresh_token,create_time,update_time"
-
-var OAUTH_TOKENS_ALL_FIELDS = []string{
-	"id",
-	"account_id",
-	"authorization_code",
-	"access_token",
-	"refresh_token",
-	"create_time",
-	"update_time",
-}
-
-type OauthTokens struct {
-	Id                uint64 //size=20
-	AccountId         string //size=128
-	AuthorizationCode string //size=128
-	AccessToken       string //size=1024
-	RefreshToken      string //size=128
-	CreateTime        time.Time
-	UpdateTime        time.Time
-}
-
-type OauthTokensQuery struct {
-	BaseQuery
-	dao *OauthTokensDao
-}
-
-func NewOauthTokensQuery(dao *OauthTokensDao) *OauthTokensQuery {
-	q := &OauthTokensQuery{}
-	q.dao = dao
-
-	return q
-}
-
-func (q *OauthTokensQuery) QueryOne(ctx context.Context, tx *wrap.Tx) (*OauthTokens, error) {
-	return q.dao.QueryOne(ctx, tx, q.buildQueryString())
-}
-
-func (q *OauthTokensQuery) QueryList(ctx context.Context, tx *wrap.Tx) (list []*OauthTokens, err error) {
-	return q.dao.QueryList(ctx, tx, q.buildQueryString())
-}
-
-func (q *OauthTokensQuery) QueryCount(ctx context.Context, tx *wrap.Tx) (count int64, err error) {
-	return q.dao.QueryCount(ctx, tx, q.buildQueryString())
-}
-
-func (q *OauthTokensQuery) QueryGroupBy(ctx context.Context, tx *wrap.Tx) (rows *wrap.Rows, err error) {
-	return q.dao.QueryGroupBy(ctx, tx, q.groupByFields, q.buildQueryString())
-}
-
-func (q *OauthTokensQuery) ForUpdate() *OauthTokensQuery {
-	q.forUpdate = true
-	return q
-}
-
-func (q *OauthTokensQuery) ForShare() *OauthTokensQuery {
-	q.forShare = true
-	return q
-}
-
-func (q *OauthTokensQuery) GroupBy(fields ...OAUTH_TOKENS_FIELD) *OauthTokensQuery {
-	q.groupByFields = make([]string, len(fields))
-	for i, v := range fields {
-		q.groupByFields[i] = string(v)
-	}
-	return q
-}
-
-func (q *OauthTokensQuery) Limit(startIncluded int64, count int64) *OauthTokensQuery {
-	q.limit = fmt.Sprintf(" limit %d,%d", startIncluded, count)
-	return q
-}
-
-func (q *OauthTokensQuery) OrderBy(fieldName OAUTH_TOKENS_FIELD, asc bool) *OauthTokensQuery {
-	if q.order != "" {
-		q.order += ","
-	}
-	q.order += string(fieldName) + " "
-	if asc {
-		q.order += "asc"
-	} else {
-		q.order += "desc"
-	}
-
-	return q
-}
-
-func (q *OauthTokensQuery) OrderByGroupCount(asc bool) *OauthTokensQuery {
-	if q.order != "" {
-		q.order += ","
-	}
-	q.order += "count(1) "
-	if asc {
-		q.order += "asc"
-	} else {
-		q.order += "desc"
-	}
-
-	return q
-}
-
-func (q *OauthTokensQuery) w(format string, a ...interface{}) *OauthTokensQuery {
-	q.where += fmt.Sprintf(format, a...)
-	return q
-}
-
-func (q *OauthTokensQuery) Left() *OauthTokensQuery  { return q.w(" ( ") }
-func (q *OauthTokensQuery) Right() *OauthTokensQuery { return q.w(" ) ") }
-func (q *OauthTokensQuery) And() *OauthTokensQuery   { return q.w(" AND ") }
-func (q *OauthTokensQuery) Or() *OauthTokensQuery    { return q.w(" OR ") }
-func (q *OauthTokensQuery) Not() *OauthTokensQuery   { return q.w(" NOT ") }
-
-func (q *OauthTokensQuery) Id_Equal(v uint64) *OauthTokensQuery {
-	return q.w("id='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) Id_NotEqual(v uint64) *OauthTokensQuery {
-	return q.w("id<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) Id_Less(v uint64) *OauthTokensQuery { return q.w("id<'" + fmt.Sprint(v) + "'") }
-func (q *OauthTokensQuery) Id_LessEqual(v uint64) *OauthTokensQuery {
-	return q.w("id<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) Id_Greater(v uint64) *OauthTokensQuery {
-	return q.w("id>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) Id_GreaterEqual(v uint64) *OauthTokensQuery {
-	return q.w("id>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccountId_Equal(v string) *OauthTokensQuery {
-	return q.w("account_id='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccountId_NotEqual(v string) *OauthTokensQuery {
-	return q.w("account_id<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccountId_Less(v string) *OauthTokensQuery {
-	return q.w("account_id<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccountId_LessEqual(v string) *OauthTokensQuery {
-	return q.w("account_id<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccountId_Greater(v string) *OauthTokensQuery {
-	return q.w("account_id>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccountId_GreaterEqual(v string) *OauthTokensQuery {
-	return q.w("account_id>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AuthorizationCode_Equal(v string) *OauthTokensQuery {
-	return q.w("authorization_code='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AuthorizationCode_NotEqual(v string) *OauthTokensQuery {
-	return q.w("authorization_code<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AuthorizationCode_Less(v string) *OauthTokensQuery {
-	return q.w("authorization_code<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AuthorizationCode_LessEqual(v string) *OauthTokensQuery {
-	return q.w("authorization_code<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AuthorizationCode_Greater(v string) *OauthTokensQuery {
-	return q.w("authorization_code>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AuthorizationCode_GreaterEqual(v string) *OauthTokensQuery {
-	return q.w("authorization_code>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccessToken_Equal(v string) *OauthTokensQuery {
-	return q.w("access_token='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccessToken_NotEqual(v string) *OauthTokensQuery {
-	return q.w("access_token<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccessToken_Less(v string) *OauthTokensQuery {
-	return q.w("access_token<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccessToken_LessEqual(v string) *OauthTokensQuery {
-	return q.w("access_token<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccessToken_Greater(v string) *OauthTokensQuery {
-	return q.w("access_token>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) AccessToken_GreaterEqual(v string) *OauthTokensQuery {
-	return q.w("access_token>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) RefreshToken_Equal(v string) *OauthTokensQuery {
-	return q.w("refresh_token='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) RefreshToken_NotEqual(v string) *OauthTokensQuery {
-	return q.w("refresh_token<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) RefreshToken_Less(v string) *OauthTokensQuery {
-	return q.w("refresh_token<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) RefreshToken_LessEqual(v string) *OauthTokensQuery {
-	return q.w("refresh_token<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) RefreshToken_Greater(v string) *OauthTokensQuery {
-	return q.w("refresh_token>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) RefreshToken_GreaterEqual(v string) *OauthTokensQuery {
-	return q.w("refresh_token>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) CreateTime_Equal(v time.Time) *OauthTokensQuery {
-	return q.w("create_time='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) CreateTime_NotEqual(v time.Time) *OauthTokensQuery {
-	return q.w("create_time<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) CreateTime_Less(v time.Time) *OauthTokensQuery {
-	return q.w("create_time<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) CreateTime_LessEqual(v time.Time) *OauthTokensQuery {
-	return q.w("create_time<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) CreateTime_Greater(v time.Time) *OauthTokensQuery {
-	return q.w("create_time>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) CreateTime_GreaterEqual(v time.Time) *OauthTokensQuery {
-	return q.w("create_time>='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) UpdateTime_Equal(v time.Time) *OauthTokensQuery {
-	return q.w("update_time='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) UpdateTime_NotEqual(v time.Time) *OauthTokensQuery {
-	return q.w("update_time<>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) UpdateTime_Less(v time.Time) *OauthTokensQuery {
-	return q.w("update_time<'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) UpdateTime_LessEqual(v time.Time) *OauthTokensQuery {
-	return q.w("update_time<='" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) UpdateTime_Greater(v time.Time) *OauthTokensQuery {
-	return q.w("update_time>'" + fmt.Sprint(v) + "'")
-}
-func (q *OauthTokensQuery) UpdateTime_GreaterEqual(v time.Time) *OauthTokensQuery {
-	return q.w("update_time>='" + fmt.Sprint(v) + "'")
-}
-
-type OauthTokensDao struct {
-	logger     *zap.Logger
-	db         *DB
-	insertStmt *wrap.Stmt
-	updateStmt *wrap.Stmt
-	deleteStmt *wrap.Stmt
-}
-
-func NewOauthTokensDao(db *DB) (t *OauthTokensDao, err error) {
-	t = &OauthTokensDao{}
-	t.logger = log.TypedLogger(t)
-	t.db = db
-	err = t.init()
-	if err != nil {
-		return nil, err
-	}
-
-	return t, nil
-}
-
-func (dao *OauthTokensDao) init() (err error) {
-	err = dao.prepareInsertStmt()
-	if err != nil {
-		return err
-	}
-
-	err = dao.prepareUpdateStmt()
-	if err != nil {
-		return err
-	}
-
-	err = dao.prepareDeleteStmt()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (dao *OauthTokensDao) prepareInsertStmt() (err error) {
-	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO oauth_tokens (account_id,authorization_code,access_token,refresh_token) VALUES (?,?,?,?)")
-	return err
-}
-
-func (dao *OauthTokensDao) prepareUpdateStmt() (err error) {
-	dao.updateStmt, err = dao.db.Prepare(context.Background(), "UPDATE oauth_tokens SET account_id=?,authorization_code=?,access_token=?,refresh_token=? WHERE id=?")
-	return err
-}
-
-func (dao *OauthTokensDao) prepareDeleteStmt() (err error) {
-	dao.deleteStmt, err = dao.db.Prepare(context.Background(), "DELETE FROM oauth_tokens WHERE id=?")
-	return err
-}
-
-func (dao *OauthTokensDao) Insert(ctx context.Context, tx *wrap.Tx, e *OauthTokens) (id int64, err error) {
-	stmt := dao.insertStmt
-	if tx != nil {
-		stmt = tx.Stmt(ctx, stmt)
-	}
-
-	result, err := stmt.Exec(ctx, e.AccountId, e.AuthorizationCode, e.AccessToken, e.RefreshToken)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err = result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
-}
-
-func (dao *OauthTokensDao) Update(ctx context.Context, tx *wrap.Tx, e *OauthTokens) (err error) {
-	stmt := dao.updateStmt
-	if tx != nil {
-		stmt = tx.Stmt(ctx, stmt)
-	}
-
-	_, err = stmt.Exec(ctx, e.AccountId, e.AuthorizationCode, e.AccessToken, e.RefreshToken, e.Id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (dao *OauthTokensDao) Delete(ctx context.Context, tx *wrap.Tx, id uint64) (err error) {
-	stmt := dao.deleteStmt
-	if tx != nil {
-		stmt = tx.Stmt(ctx, stmt)
-	}
-
-	_, err = stmt.Exec(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (dao *OauthTokensDao) scanRow(row *wrap.Row) (*OauthTokens, error) {
-	e := &OauthTokens{}
-	err := row.Scan(&e.Id, &e.AccountId, &e.AuthorizationCode, &e.AccessToken, &e.RefreshToken, &e.CreateTime, &e.UpdateTime)
-	if err != nil {
-		if err == wrap.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
-	}
-
-	return e, nil
-}
-
-func (dao *OauthTokensDao) scanRows(rows *wrap.Rows) (list []*OauthTokens, err error) {
-	list = make([]*OauthTokens, 0)
-	for rows.Next() {
-		e := OauthTokens{}
-		err = rows.Scan(&e.Id, &e.AccountId, &e.AuthorizationCode, &e.AccessToken, &e.RefreshToken, &e.CreateTime, &e.UpdateTime)
-		if err != nil {
-			return nil, err
-		}
-		list = append(list, &e)
-	}
-	if rows.Err() != nil {
-		err = rows.Err()
-		return nil, err
-	}
-
-	return list, nil
-}
-
-func (dao *OauthTokensDao) QueryOne(ctx context.Context, tx *wrap.Tx, query string) (*OauthTokens, error) {
-	querySql := "SELECT " + OAUTH_TOKENS_ALL_FIELDS_STRING + " FROM oauth_tokens " + query
-	var row *wrap.Row
-	if tx == nil {
-		row = dao.db.QueryRow(ctx, querySql)
-	} else {
-		row = tx.QueryRow(ctx, querySql)
-	}
-	return dao.scanRow(row)
-}
-
-func (dao *OauthTokensDao) QueryList(ctx context.Context, tx *wrap.Tx, query string) (list []*OauthTokens, err error) {
-	querySql := "SELECT " + OAUTH_TOKENS_ALL_FIELDS_STRING + " FROM oauth_tokens " + query
-	var rows *wrap.Rows
-	if tx == nil {
-		rows, err = dao.db.Query(ctx, querySql)
-	} else {
-		rows, err = tx.Query(ctx, querySql)
-	}
-	if err != nil {
-		dao.logger.Error("sqlDriver", zap.Error(err))
-		return nil, err
-	}
-
-	return dao.scanRows(rows)
-}
-
-func (dao *OauthTokensDao) QueryCount(ctx context.Context, tx *wrap.Tx, query string) (count int64, err error) {
-	querySql := "SELECT COUNT(1) FROM oauth_tokens " + query
-	var row *wrap.Row
-	if tx == nil {
-		row = dao.db.QueryRow(ctx, querySql)
-	} else {
-		row = tx.QueryRow(ctx, querySql)
-	}
-	if err != nil {
-		dao.logger.Error("sqlDriver", zap.Error(err))
-		return 0, err
-	}
-
-	err = row.Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
-}
-
-func (dao *OauthTokensDao) QueryGroupBy(ctx context.Context, tx *wrap.Tx, groupByFields []string, query string) (rows *wrap.Rows, err error) {
-	querySql := "SELECT " + strings.Join(groupByFields, ",") + ",count(1) FROM oauth_tokens " + query
-	if tx == nil {
-		return dao.db.Query(ctx, querySql)
-	} else {
-		return tx.Query(ctx, querySql)
-	}
-}
-
-func (dao *OauthTokensDao) GetQuery() *OauthTokensQuery {
-	return NewOauthTokensQuery(dao)
-}
-
 const REFRESH_TOKEN_TABLE_NAME = "refresh_token"
 
 type REFRESH_TOKEN_FIELD string
 
 const REFRESH_TOKEN_FIELD_ID = REFRESH_TOKEN_FIELD("id")
+const REFRESH_TOKEN_FIELD_OAUTH_STATE = REFRESH_TOKEN_FIELD("oauth_state")
+const REFRESH_TOKEN_FIELD_QUERY_STRING = REFRESH_TOKEN_FIELD("query_string")
+const REFRESH_TOKEN_FIELD_USER_AGENT = REFRESH_TOKEN_FIELD("user_agent")
 const REFRESH_TOKEN_FIELD_ACCOUNT_ID = REFRESH_TOKEN_FIELD("account_id")
 const REFRESH_TOKEN_FIELD_REFRESH_TOKEN = REFRESH_TOKEN_FIELD("refresh_token")
+const REFRESH_TOKEN_FIELD_IS_LOGOUT = REFRESH_TOKEN_FIELD("is_logout")
+const REFRESH_TOKEN_FIELD_GMT_LOGOUT = REFRESH_TOKEN_FIELD("gmt_logout")
+const REFRESH_TOKEN_FIELD_OAUTH_AUTHORIZATION_CODE = REFRESH_TOKEN_FIELD("oauth_authorization_code")
+const REFRESH_TOKEN_FIELD_OAUTH_REFRESH_TOKEN = REFRESH_TOKEN_FIELD("oauth_refresh_token")
 const REFRESH_TOKEN_FIELD_CREATE_TIME = REFRESH_TOKEN_FIELD("create_time")
 const REFRESH_TOKEN_FIELD_UPDATE_TIME = REFRESH_TOKEN_FIELD("update_time")
 
-const REFRESH_TOKEN_ALL_FIELDS_STRING = "id,account_id,refresh_token,create_time,update_time"
+const REFRESH_TOKEN_ALL_FIELDS_STRING = "id,oauth_state,query_string,user_agent,account_id,refresh_token,is_logout,gmt_logout,oauth_authorization_code,oauth_refresh_token,create_time,update_time"
 
 var REFRESH_TOKEN_ALL_FIELDS = []string{
 	"id",
+	"oauth_state",
+	"query_string",
+	"user_agent",
 	"account_id",
 	"refresh_token",
+	"is_logout",
+	"gmt_logout",
+	"oauth_authorization_code",
+	"oauth_refresh_token",
 	"create_time",
 	"update_time",
 }
 
 type RefreshToken struct {
-	Id           uint64 //size=20
-	AccountId    string //size=128
-	RefreshToken string //size=128
-	CreateTime   time.Time
-	UpdateTime   time.Time
+	Id                     uint64 //size=20
+	OauthState             string //size=128
+	QueryString            string //size=256
+	UserAgent              string //size=256
+	AccountId              string //size=128
+	RefreshToken           string //size=128
+	IsLogout               int32  //size=1
+	GmtLogout              time.Time
+	OauthAuthorizationCode string //size=128
+	OauthRefreshToken      string //size=128
+	CreateTime             time.Time
+	UpdateTime             time.Time
 }
 
 type RefreshTokenQuery struct {
@@ -1058,6 +216,60 @@ func (q *RefreshTokenQuery) Id_Greater(v uint64) *RefreshTokenQuery {
 func (q *RefreshTokenQuery) Id_GreaterEqual(v uint64) *RefreshTokenQuery {
 	return q.w("id>='" + fmt.Sprint(v) + "'")
 }
+func (q *RefreshTokenQuery) OauthState_Equal(v string) *RefreshTokenQuery {
+	return q.w("oauth_state='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthState_NotEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_state<>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthState_Less(v string) *RefreshTokenQuery {
+	return q.w("oauth_state<'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthState_LessEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_state<='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthState_Greater(v string) *RefreshTokenQuery {
+	return q.w("oauth_state>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthState_GreaterEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_state>='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) QueryString_Equal(v string) *RefreshTokenQuery {
+	return q.w("query_string='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) QueryString_NotEqual(v string) *RefreshTokenQuery {
+	return q.w("query_string<>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) QueryString_Less(v string) *RefreshTokenQuery {
+	return q.w("query_string<'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) QueryString_LessEqual(v string) *RefreshTokenQuery {
+	return q.w("query_string<='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) QueryString_Greater(v string) *RefreshTokenQuery {
+	return q.w("query_string>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) QueryString_GreaterEqual(v string) *RefreshTokenQuery {
+	return q.w("query_string>='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) UserAgent_Equal(v string) *RefreshTokenQuery {
+	return q.w("user_agent='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) UserAgent_NotEqual(v string) *RefreshTokenQuery {
+	return q.w("user_agent<>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) UserAgent_Less(v string) *RefreshTokenQuery {
+	return q.w("user_agent<'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) UserAgent_LessEqual(v string) *RefreshTokenQuery {
+	return q.w("user_agent<='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) UserAgent_Greater(v string) *RefreshTokenQuery {
+	return q.w("user_agent>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) UserAgent_GreaterEqual(v string) *RefreshTokenQuery {
+	return q.w("user_agent>='" + fmt.Sprint(v) + "'")
+}
 func (q *RefreshTokenQuery) AccountId_Equal(v string) *RefreshTokenQuery {
 	return q.w("account_id='" + fmt.Sprint(v) + "'")
 }
@@ -1093,6 +305,78 @@ func (q *RefreshTokenQuery) RefreshToken_Greater(v string) *RefreshTokenQuery {
 }
 func (q *RefreshTokenQuery) RefreshToken_GreaterEqual(v string) *RefreshTokenQuery {
 	return q.w("refresh_token>='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) IsLogout_Equal(v int32) *RefreshTokenQuery {
+	return q.w("is_logout='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) IsLogout_NotEqual(v int32) *RefreshTokenQuery {
+	return q.w("is_logout<>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) IsLogout_Less(v int32) *RefreshTokenQuery {
+	return q.w("is_logout<'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) IsLogout_LessEqual(v int32) *RefreshTokenQuery {
+	return q.w("is_logout<='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) IsLogout_Greater(v int32) *RefreshTokenQuery {
+	return q.w("is_logout>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) IsLogout_GreaterEqual(v int32) *RefreshTokenQuery {
+	return q.w("is_logout>='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) GmtLogout_Equal(v time.Time) *RefreshTokenQuery {
+	return q.w("gmt_logout='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) GmtLogout_NotEqual(v time.Time) *RefreshTokenQuery {
+	return q.w("gmt_logout<>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) GmtLogout_Less(v time.Time) *RefreshTokenQuery {
+	return q.w("gmt_logout<'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) GmtLogout_LessEqual(v time.Time) *RefreshTokenQuery {
+	return q.w("gmt_logout<='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) GmtLogout_Greater(v time.Time) *RefreshTokenQuery {
+	return q.w("gmt_logout>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) GmtLogout_GreaterEqual(v time.Time) *RefreshTokenQuery {
+	return q.w("gmt_logout>='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthAuthorizationCode_Equal(v string) *RefreshTokenQuery {
+	return q.w("oauth_authorization_code='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthAuthorizationCode_NotEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_authorization_code<>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthAuthorizationCode_Less(v string) *RefreshTokenQuery {
+	return q.w("oauth_authorization_code<'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthAuthorizationCode_LessEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_authorization_code<='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthAuthorizationCode_Greater(v string) *RefreshTokenQuery {
+	return q.w("oauth_authorization_code>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthAuthorizationCode_GreaterEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_authorization_code>='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthRefreshToken_Equal(v string) *RefreshTokenQuery {
+	return q.w("oauth_refresh_token='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthRefreshToken_NotEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_refresh_token<>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthRefreshToken_Less(v string) *RefreshTokenQuery {
+	return q.w("oauth_refresh_token<'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthRefreshToken_LessEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_refresh_token<='" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthRefreshToken_Greater(v string) *RefreshTokenQuery {
+	return q.w("oauth_refresh_token>'" + fmt.Sprint(v) + "'")
+}
+func (q *RefreshTokenQuery) OauthRefreshToken_GreaterEqual(v string) *RefreshTokenQuery {
+	return q.w("oauth_refresh_token>='" + fmt.Sprint(v) + "'")
 }
 func (q *RefreshTokenQuery) CreateTime_Equal(v time.Time) *RefreshTokenQuery {
 	return q.w("create_time='" + fmt.Sprint(v) + "'")
@@ -1171,12 +455,12 @@ func (dao *RefreshTokenDao) init() (err error) {
 }
 
 func (dao *RefreshTokenDao) prepareInsertStmt() (err error) {
-	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO refresh_token (account_id,refresh_token) VALUES (?,?)")
+	dao.insertStmt, err = dao.db.Prepare(context.Background(), "INSERT INTO refresh_token (oauth_state,query_string,user_agent,account_id,refresh_token,is_logout,gmt_logout,oauth_authorization_code,oauth_refresh_token) VALUES (?,?,?,?,?,?,?,?,?)")
 	return err
 }
 
 func (dao *RefreshTokenDao) prepareUpdateStmt() (err error) {
-	dao.updateStmt, err = dao.db.Prepare(context.Background(), "UPDATE refresh_token SET account_id=?,refresh_token=? WHERE id=?")
+	dao.updateStmt, err = dao.db.Prepare(context.Background(), "UPDATE refresh_token SET oauth_state=?,query_string=?,user_agent=?,account_id=?,refresh_token=?,is_logout=?,gmt_logout=?,oauth_authorization_code=?,oauth_refresh_token=? WHERE id=?")
 	return err
 }
 
@@ -1191,7 +475,7 @@ func (dao *RefreshTokenDao) Insert(ctx context.Context, tx *wrap.Tx, e *RefreshT
 		stmt = tx.Stmt(ctx, stmt)
 	}
 
-	result, err := stmt.Exec(ctx, e.AccountId, e.RefreshToken)
+	result, err := stmt.Exec(ctx, e.OauthState, e.QueryString, e.UserAgent, e.AccountId, e.RefreshToken, e.IsLogout, e.GmtLogout, e.OauthAuthorizationCode, e.OauthRefreshToken)
 	if err != nil {
 		return 0, err
 	}
@@ -1210,7 +494,7 @@ func (dao *RefreshTokenDao) Update(ctx context.Context, tx *wrap.Tx, e *RefreshT
 		stmt = tx.Stmt(ctx, stmt)
 	}
 
-	_, err = stmt.Exec(ctx, e.AccountId, e.RefreshToken, e.Id)
+	_, err = stmt.Exec(ctx, e.OauthState, e.QueryString, e.UserAgent, e.AccountId, e.RefreshToken, e.IsLogout, e.GmtLogout, e.OauthAuthorizationCode, e.OauthRefreshToken, e.Id)
 	if err != nil {
 		return err
 	}
@@ -1234,7 +518,7 @@ func (dao *RefreshTokenDao) Delete(ctx context.Context, tx *wrap.Tx, id uint64) 
 
 func (dao *RefreshTokenDao) scanRow(row *wrap.Row) (*RefreshToken, error) {
 	e := &RefreshToken{}
-	err := row.Scan(&e.Id, &e.AccountId, &e.RefreshToken, &e.CreateTime, &e.UpdateTime)
+	err := row.Scan(&e.Id, &e.OauthState, &e.QueryString, &e.UserAgent, &e.AccountId, &e.RefreshToken, &e.IsLogout, &e.GmtLogout, &e.OauthAuthorizationCode, &e.OauthRefreshToken, &e.CreateTime, &e.UpdateTime)
 	if err != nil {
 		if err == wrap.ErrNoRows {
 			return nil, nil
@@ -1250,7 +534,7 @@ func (dao *RefreshTokenDao) scanRows(rows *wrap.Rows) (list []*RefreshToken, err
 	list = make([]*RefreshToken, 0)
 	for rows.Next() {
 		e := RefreshToken{}
-		err = rows.Scan(&e.Id, &e.AccountId, &e.RefreshToken, &e.CreateTime, &e.UpdateTime)
+		err = rows.Scan(&e.Id, &e.OauthState, &e.QueryString, &e.UserAgent, &e.AccountId, &e.RefreshToken, &e.IsLogout, &e.GmtLogout, &e.OauthAuthorizationCode, &e.OauthRefreshToken, &e.CreateTime, &e.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -1745,8 +1029,6 @@ func (dao *UserTokenDao) GetQuery() *UserTokenQuery {
 
 type DB struct {
 	wrap.DB
-	OauthState   *OauthStateDao
-	OauthTokens  *OauthTokensDao
 	RefreshToken *RefreshTokenDao
 	UserToken    *UserTokenDao
 }
@@ -1766,16 +1048,6 @@ func NewDB() (d *DB, err error) {
 	d.DB = *db
 
 	err = d.Ping(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	d.OauthState, err = NewOauthStateDao(d)
-	if err != nil {
-		return nil, err
-	}
-
-	d.OauthTokens, err = NewOauthTokensDao(d)
 	if err != nil {
 		return nil, err
 	}

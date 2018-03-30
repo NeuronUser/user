@@ -1,30 +1,30 @@
 package services
 
 import (
-	"context"
 	"encoding/base64"
+	"github.com/NeuronFramework/errors"
 	"github.com/NeuronFramework/rand"
 	"github.com/NeuronFramework/restful"
-	"github.com/NeuronFramework/sql/wrap"
-	"github.com/NeuronFramework2/errors"
 	"github.com/NeuronUser/user/models"
 	"github.com/NeuronUser/user/remotes/oauth/gen/client/operations"
 	"github.com/NeuronUser/user/storages/user_db"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"go.uber.org/zap"
 	"time"
 )
 
-func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authorizationCode string, state string) (result *models.OauthJumpResponse, err error) {
-	//check state
-	dbState, err := s.userDB.OauthState.GetQuery().OauthState_Equal(state).QueryOne(ctx, nil)
+func (s *UserService) OauthJump(ctx *restful.Context, redirectUri string, authorizationCode string, state string) (result *models.OauthJumpResponse, err error) {
+	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().OauthState_Equal(state).QueryOne(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	if dbState == nil {
-		return nil, errors.InvalidParam("state", "无效的state")
+	if dbRefreshToken == nil {
+		return nil, errors.InvalidParam("无效的state")
+	}
+
+	if dbRefreshToken.AccountId != "" {
+		return nil, errors.InvalidParam("state已使用")
 	}
 
 	//remote get access token
@@ -44,7 +44,7 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	}
 	oauthAccessToken := tokenOk.Payload
 	if oauthAccessToken == nil {
-		return nil, errors.InvalidParam("accessToken", "获取accessToken失败")
+		return nil, errors.InvalidParam("获取accessToken失败")
 	}
 
 	//remote get account id
@@ -57,18 +57,7 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 	}
 	accountId := meOk.Payload
 	if accountId == "" {
-		return nil, errors.InvalidParam("accountId", "获取accountId失败")
-	}
-
-	//store oauth access token and account
-	dbOauthTokens := &user_db.OauthTokens{}
-	dbOauthTokens.AuthorizationCode = authorizationCode
-	dbOauthTokens.AccessToken = oauthAccessToken.AccessToken
-	dbOauthTokens.RefreshToken = oauthAccessToken.RefreshToken
-	dbOauthTokens.AccountId = accountId
-	_, err = s.userDB.OauthTokens.Insert(ctx, nil, dbOauthTokens)
-	if err != nil {
-		return nil, err
+		return nil, errors.InvalidParam("获取accountId失败")
 	}
 
 	//generate user token
@@ -90,61 +79,18 @@ func (s *UserService) OauthJump(ctx context.Context, redirectUri string, authori
 		return nil, err
 	}
 
-	//generate user refresh token
-	userRefreshToken := rand.NextHex(16)
-	dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().AccountId_Equal(accountId).QueryOne(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	if dbRefreshToken != nil {
-		dbRefreshToken.RefreshToken = userRefreshToken
-		err = s.userDB.RefreshToken.Update(ctx, nil, dbRefreshToken)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		err = s.userDB.TransactionReadCommitted(ctx, false, func(tx *wrap.Tx) (err error) {
-			dbRefreshToken, err := s.userDB.RefreshToken.GetQuery().AccountId_Equal(accountId).QueryOne(ctx, tx)
-			if err != nil {
-				return err
-			}
-
-			if dbRefreshToken == nil {
-				dbRefreshToken = &user_db.RefreshToken{}
-				dbRefreshToken.AccountId = accountId
-				dbRefreshToken.RefreshToken = userRefreshToken
-				_, err = s.userDB.RefreshToken.Insert(ctx, tx, dbRefreshToken)
-				if err != nil {
-					return err
-				}
-			} else {
-				dbRefreshToken.RefreshToken = userRefreshToken
-				err = s.userDB.RefreshToken.Update(ctx, tx, dbRefreshToken)
-				if err != nil {
-					return err
-				}
-			}
-
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	//update state used
-	dbState.StateUsed = 1
-	err = s.userDB.OauthState.Update(ctx, nil, dbState)
-	if err != nil {
-		s.logger.Warn("OauthStateUpdate", zap.Error(err))
-	}
+	dbRefreshToken.OauthAuthorizationCode = authorizationCode
+	dbRefreshToken.OauthRefreshToken = oauthAccessToken.RefreshToken
+	dbRefreshToken.AccountId = accountId
+	dbRefreshToken.RefreshToken = rand.NextHex(16)
+	s.userDB.RefreshToken.Update(ctx, nil, dbRefreshToken)
 
 	result = &models.OauthJumpResponse{}
 	result.UserID = dbUserToken.AccountId
 	result.Token = &models.Token{}
 	result.Token.AccessToken = userAccessToken
-	result.Token.RefreshToken = userRefreshToken
-	result.QueryString = dbState.QueryString
+	result.Token.RefreshToken = dbRefreshToken.RefreshToken
+	result.QueryString = dbRefreshToken.QueryString
 
 	return result, nil
 }
