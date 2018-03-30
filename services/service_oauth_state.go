@@ -13,6 +13,7 @@ func (s *UserService) OauthState(ctx *restful.Context, queryString string) (stat
 	dbRefreshToken.QueryString = queryString
 	dbRefreshToken.UserAgent = ctx.UserAgent
 	dbRefreshToken.GmtLogout = time.Now()
+	dbRefreshToken.RefreshToken = rand.NextHex(16)
 	_, err = s.userDB.RefreshToken.Insert(ctx, nil, dbRefreshToken)
 	if err != nil {
 		return "", err

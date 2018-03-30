@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/base64"
 	"github.com/NeuronFramework/errors"
-	"github.com/NeuronFramework/rand"
 	"github.com/NeuronFramework/restful"
 	"github.com/NeuronUser/user/models"
 	"github.com/NeuronUser/user/remotes/oauth/gen/client/operations"
@@ -82,8 +81,10 @@ func (s *UserService) OauthJump(ctx *restful.Context, redirectUri string, author
 	dbRefreshToken.OauthAuthorizationCode = authorizationCode
 	dbRefreshToken.OauthRefreshToken = oauthAccessToken.RefreshToken
 	dbRefreshToken.AccountId = accountId
-	dbRefreshToken.RefreshToken = rand.NextHex(16)
-	s.userDB.RefreshToken.Update(ctx, nil, dbRefreshToken)
+	err = s.userDB.RefreshToken.Update(ctx, nil, dbRefreshToken)
+	if err != nil {
+		return nil, err
+	}
 
 	result = &models.OauthJumpResponse{}
 	result.UserID = dbUserToken.AccountId
