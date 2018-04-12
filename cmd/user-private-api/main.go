@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/NeuronFramework/restful"
-	"github.com/NeuronUser/user/api-private/gen/restapi"
-	"github.com/NeuronUser/user/api-private/gen/restapi/operations"
+	"github.com/NeuronUser/user/api/gen/restapi"
+	"github.com/NeuronUser/user/api/gen/restapi/operations"
 	"github.com/NeuronUser/user/cmd/user-private-api/handler"
 	"github.com/go-openapi/loads"
 	"net/http"
@@ -21,11 +21,9 @@ func main() {
 			return nil, err
 		}
 
-		api := operations.NewUserPrivateAPI(swaggerSpec)
-		api.OauthStateHandler = operations.OauthStateHandlerFunc(h.OauthState)
-		api.OauthJumpHandler = operations.OauthJumpHandlerFunc(h.OauthJump)
-		api.RefreshTokenHandler = operations.RefreshTokenHandlerFunc(h.RefreshToken)
-		api.LogoutHandler = operations.LogoutHandlerFunc(h.Logout)
+		api := operations.NewUserAPI(swaggerSpec)
+		api.BearerAuth = h.BearerAuth
+		api.GetUserInfoHandler = operations.GetUserInfoHandlerFunc(h.GetUserInfo)
 
 		return api.Serve(nil), nil
 	})

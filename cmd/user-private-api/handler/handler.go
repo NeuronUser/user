@@ -4,8 +4,9 @@ import (
 	"github.com/NeuronFramework/errors"
 	"github.com/NeuronFramework/log"
 	"github.com/NeuronFramework/restful"
-	"github.com/NeuronUser/user/api-private/gen/restapi/operations"
+	"github.com/NeuronUser/user/api/gen/restapi/operations"
 	"github.com/NeuronUser/user/services"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime/middleware"
 	"go.uber.org/zap"
 )
@@ -26,40 +27,27 @@ func NewUserHandler() (h *UserHandler, err error) {
 	return h, nil
 }
 
-func (h *UserHandler) OauthState(p operations.OauthStateParams) middleware.Responder {
-	state, err := h.service.OauthState(restful.NewContext(p.HTTPRequest), p.QueryString)
+func (h *UserHandler) BearerAuth(token string) (userId interface{}, err error) {
+	claims := jwt.StandardClaims{}
+	_, err = jwt.ParseWithClaims(token, &claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte("0123456789"), nil
+	})
 	if err != nil {
-		return errors.Wrap(err)
+		return nil, err
 	}
 
-	return operations.NewOauthStateOK().WithPayload(state)
+	if claims.Subject == "" {
+		return nil, errors.Unknown("验证失败： claims.Subject nil")
+	}
+
+	return claims.Subject, nil
 }
 
-func (h *UserHandler) OauthJump(p operations.OauthJumpParams) middleware.Responder {
-	result, err := h.service.OauthJump(restful.NewContext(p.HTTPRequest), p.RedirectURI, p.AuthorizationCode, p.State)
+func (h *UserHandler) GetUserInfo(p operations.GetUserInfoParams, userId interface{}) middleware.Responder {
+	userInfo, err := h.service.GetUserInfo(restful.NewContext(p.HTTPRequest), userId.(string))
 	if err != nil {
 		return errors.Wrap(err)
 	}
 
-	return operations.NewOauthJumpOK().WithPayload(fromOauthJumpResponse(result))
-}
-
-func (h *UserHandler) RefreshToken(p operations.RefreshTokenParams) middleware.Responder {
-	token, err := h.service.RefreshToken(restful.NewContext(p.HTTPRequest), p.RefreshToken)
-	if err != nil {
-		return errors.Wrap(err)
-	}
-
-	return operations.NewRefreshTokenOK().WithPayload(fromToken(token))
-}
-
-func (h *UserHandler) Logout(p operations.LogoutParams) middleware.Responder {
-	p.HTTPRequest.Context()
-
-	err := h.service.Logout(restful.NewContext(p.HTTPRequest), p.Token, p.RefreshToken)
-	if err != nil {
-		return errors.Wrap(err)
-	}
-
-	return operations.NewLogoutOK()
+	return operations.NewGetUserInfoOK().WithPayload(fromUserInfo(userInfo))
 }

@@ -1,0 +1,75 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "",
+    "title": "User API",
+    "contact": {
+      "name": "mars"
+    },
+    "version": "v1"
+  },
+  "basePath": "/api/v1/users",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "Basic": {
+      "type": "basic"
+    },
+    "Bearer": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "parameters": {
+  },
+  "paths": {
+    "/userInfo":{
+      "get": {
+        "summary": "",
+        "operationId": "GetUserInfo",
+        "parameters": [
+
+        ],
+        "security": [
+          {
+            "Bearer": [
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/userInfo"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "userInfo":{
+      "type": "object",
+      "properties": {
+        "userId":{
+          "type": "string"
+        },
+        "name":{
+          "type": "string"
+        },
+        "icon":{
+          "type": "string"
+        }
+      }
+    }
+  }
+}
